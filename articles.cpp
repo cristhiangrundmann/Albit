@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 #define BUFFERSIZE 0x10000
 
@@ -79,11 +80,17 @@ void process_file(int i)
 
 int main()
 {
+
+    time_t time0 = time(0);
+
     for(int i = 0; i < 164; i++)
     {
         //lineno = 0;
         printf("::%d::\n", i);
         process_file(i);
     }
+
+    printf("Time = %lu\n", time(0) - time0);
+
     return 0;
 }
