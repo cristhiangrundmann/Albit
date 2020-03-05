@@ -9,8 +9,8 @@ char buffer_a[BUFFERSIZE + 1];
 char buffer_b[BUFFERSIZE + 1];
 char buffer_l[BUFFERSIZE + 1];
 
-char *buf_old, *buf_new, *line, span;
-size_t linelen, lineno;
+char *buf_get, *buf_set, *line, span;
+size_t linelen;
 
 char make_line()
 {
@@ -21,47 +21,90 @@ char make_line()
     }
 
     strcpy(buffer_l, line);
-    if(span) strcat(buffer_l, buf_new);
+    if(span) strcat(buffer_l, buf_get);
 
     return 1;
+}
+
+void process_tags()
+{
+    static const char *doctag = "<doc ";
+    const char *tag = doctag;
+    char *cur = buffer_l;
+
+    for(; *tag; tag++)
+    {
+        if(*tag != *cur) return;
+        cur++;
+    }
+
+    int quos = 0;
+    char *title_str;
+
+    for(; *cur; cur++)
+    if(*cur == '"') 
+    {
+        quos++;
+        if(quos == 3) 
+        {
+            title_str = cur+1;
+            break;
+        }
+    }
+
+    if(quos != 3) return;
+
+    quos = 0;
+
+    cur = buffer_l + linelen - 1;
+
+    for(; *cur; cur--)
+    if(*cur == '"')
+    {
+        quos++;
+        if(quos == 7) 
+        {
+            *cur = 0;
+            break;
+        }
+    }
+
+    if(quos != 7) return;
 }
 
 void process_line()
 {
     if(!make_line()) return;
 
-    //...
+    process_tags();
 }
 
-void process_file(int i)
+void process_file(const char *filename)
 {
-    char filename[24];
-    sprintf(filename, "./database/db%d", i);
     FILE *dbi = fopen(filename, "rb");
     if(!dbi) return;
 
-    buf_old = buffer_a;
-    buf_new = buffer_b;
+    buf_get = buffer_a;
+    buf_set = buffer_b;
 
     span = 0;
-    line = buf_new;
+    line = buf_set;
 
     size_t len;
 
-    while(len = fread(buf_new, 1, BUFFERSIZE, dbi))
+    while(len = fread(buf_set, 1, BUFFERSIZE, dbi))
     {
-        buf_new[len] = 0;
-        for(char *cur = buf_new; *cur; cur++)
+        buf_set[len] = 0;
+        char *t = buf_set; buf_set = buf_get; buf_get = t;
+
+        char *cur = buf_get;
+        for(; *cur; cur++)
         {
             if(*cur == '\n')
             {
-                lineno++;
-
-                if(*line != '\n')
-                {
-                    *cur = 0;
-                    process_line();
-                }
+                *cur = 0;
+                process_line();
+            
                 line = cur + 1;
                 span = 0;
                 linelen = 0;
@@ -69,10 +112,8 @@ void process_file(int i)
             }
             linelen++;
         }
-        span = buf_new[len - 1] != '\n';
-        char *t = buf_new; buf_new = buf_old; buf_old = t;
+        span = buf_get[len - 1] != '\n';
     }
-    lineno++;
     process_line();
 
     fclose(dbi);
@@ -80,14 +121,14 @@ void process_file(int i)
 
 int main()
 {
-
     time_t time0 = time(0);
 
     for(int i = 0; i < 164; i++)
     {
-        //lineno = 0;
         printf("::%d::\n", i);
-        process_file(i);
+        char filename[24];
+        sprintf(filename, "./database/db%d", i);
+        process_file(filename);
     }
 
     printf("Time = %lu\n", time(0) - time0);
