@@ -1,2 +1,4 @@
-database/
+database/*
+titles/*
+.vscode/
 a.out
