@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -12,7 +14,7 @@ using namespace std;
 
 // GET TITLE ###################################
 
-int find_nth(string& str, char pat, int n) {
+size_t find_nth(string& str, char pat, int n) {
 
     int begin, end, delta;
     
@@ -54,8 +56,8 @@ int find_nth(string& str, char pat, int n) {
 
 string get_title(string& line) {
 
-    int begin = find_nth(line, '"', 3);
-    int end = find_nth(line, '"', -7);
+    size_t begin = find_nth(line, '"', 3);
+    size_t end = find_nth(line, '"', -7);
 
     return line.substr(begin + 1, end - begin - 1);
 
@@ -71,104 +73,46 @@ string get_title(string& line) {
 
 
 
+int main() {
+    
+	for (int i = 0; i < 164; i++) {
 
-
-
-// LIST ########################################
-
-class Link_List {
-
-    class Node {
-
-        public:
-
-        Node(string val, Node* nxt): value(val), next(nxt){}
+        vector<string> title_list;
         
-        ~Node() {
-            if (next)
-                delete next;
-        }
+        string name("database/db");
+        name += to_string(i);
+        cout << name << endl;
 
-        string value;
-        Node* next;
+        ifstream db(name);
+        string line;
+        if (db.is_open()) {
 
-    };
-
-    Node* begin = nullptr;
-
-    public:
-
-    void insert(string value) {
-
-        Node** pos = &begin;
-
-        while (1) {
-
-            if (*pos == nullptr || (*pos)->value > value) {
-
-                *pos = new Node(value, *pos);
-                return;
+            title_list.reserve(10000);
+            
+            while (getline(db, line)) {
+            
+                if (line.compare(0, 5, "<doc ") == 0)
+                    title_list.push_back(get_title(line));
 
             }
 
-            pos = &(*pos)->next;
-
+            db.close();
+        
         }
 
-    }
+        sort(title_list.begin(), title_list.end());
 
-    void print() {
+        string name2("titles/titles");
+        name2 += to_string(i);
 
-        Node** pos = &begin;
+        ofstream titles(name2);
+        for (string title : title_list)
+            titles << title << endl;
+        
+        titles.close();
 
-        while (1) {
-
-            if (*pos == nullptr)
-                return;
-
-            cout << (*pos)->value << endl;
-            pos = &(*pos)->next;
-            
-        }
 
     }
-
-    ~Link_List() {
-        if (begin)
-            delete begin;
-    }
-
-};
-
-// #############################################
-
-
-
-
-
-
-
-
-
-int main() {
-
-    Link_List title_list;
-
-    string line;
-    ifstream db("database/db68");
-    if (db.is_open()) {
-
-        while (getline(db, line)) {
-            
-            if (line.compare(0, 5, "<doc ") == 0)
-                title_list.insert(get_title(line));
-
-        }
-
-        db.close();
-    }
-
-    title_list.print();
 
     return 0;
 
