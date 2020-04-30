@@ -29,6 +29,12 @@ int conta(string s[],string p){
 	return qtd;	
 }
 
+void sort(list[]){ //recebe uma lista no formato [[1,2.8],[6,0.3],[4,9.2]] // Só chamada ao final da montagem da arvore geral
+	//ordena a lista em ordem inversa usando o segundo elemento como chave, resultando no tipo: [[4,9.2],[1,2.8],[6,0.3]]
+	//elimina os segundos termos da lista, resultado do tipo: [4,1,6]
+	//ao final, a lista contém apenas IDs dos textos em ordem de prioridade para exibição na busca
+}
+
 tree poda(tree arvore){
 	for(NODE in arvore){
 		if(NODE_NAO_POSSUI_PESO/LISTA && NODE_SO_TEM_1_FILHO){
@@ -37,6 +43,9 @@ tree poda(tree arvore){
 			NO_AUX=NODE.FILHO;
 			NODE.FILHOS=NODE.FILHOS.FILHOS;
 			delete NO_AUX;
+		}
+		if(NO_POSSUI_ID_LIST){
+			NODE.list=sort(NODE.list)
 		}
 	}
 	return arvore;
@@ -67,6 +76,14 @@ void save(tree arvore){
 	//salva a árvore SEM ID (apenas para armazenar a árvore grande)
 }
 
+void merge(tree arvore, tree mescla, int id){
+	for(PALAVRA in mescla){
+		arvore.insert(PALAVRA); //insere se não houver
+		no=arvore.find(PALAVRA); //determina a posição da palavra
+		no.LIST.append([id,PESO_DA_PALAVRA_EM_MESCLA])
+	}
+}
+
 
 int main(){
 
@@ -84,7 +101,7 @@ int main(){
 	//Montadas todas as árvores pequenas, monta-se a grande (processo separado para que possa mais facilmente ser interrompido sem)
 	tree arvore_final;
 	for(t=0;t<QTD_TEXTOS;T++){
-		merge(arvore_final,abre(id));
+		merge(arvore_final,abre(id),id);
 	}
 	poda(arvore_final);
 	save(arvore_final);
