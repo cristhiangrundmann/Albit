@@ -1,0 +1,92 @@
+//PSEUDOCÓDIGO DO MODELO DE PRÉ-PROCESSAMENTO SUGERIDO COM SISTEMA DE PAGERANK ADAPTADO
+
+class tree{
+	//implementação das árvores.2 tipos: cada nó tem um peso(nas arvores pequenas) OU uma lista de IDs (na arvore grande).
+}
+
+struct file{
+	string titulo[]; //Lista de strings, cada string é uma palavra
+	string subtitulo[]; //Lista de strings, cada string é uma palavra
+	string corpo[]; //Lista de strings, cada string é uma palavra
+}
+
+file read(t){
+	//Ler t-ésimo texto em ordem alfabética de titulo e retorná-lo
+}
+
+tree abre(id){
+	//lê do disco a árvore com indice "id" e armazena em árvore	
+	return arvore;
+}
+
+int conta(string s[],string p){
+	qtd=0;
+	for(PALAVRA in s){
+		if(PALAVRA==p){
+			qtd++;
+		}
+	}
+	return qtd;	
+}
+
+tree poda(tree arvore){
+	for(NODE in arvore){
+		if(NODE_NAO_POSSUI_PESO/LISTA && NODE_SO_TEM_1_FILHO){
+			//"deletar" nó juntando-o com o filho
+			NODE.key=NODE.key+NODE.FILHO.key;
+			NO_AUX=NODE.FILHO;
+			NODE.FILHOS=NODE.FILHOS.FILHOS;
+			delete NO_AUX;
+		}
+	}
+	return arvore;
+}
+
+tree first_read(texto,p_titulo,p_subtitulo,p_corpo){
+	tree gen; //Cria uma árvore vazia
+	string words[]=//lista de todas as palavras no texto
+	for(PALAVRA in words) {
+		gen.insert(PALAVRA);
+	}
+	for(NODE in gen){
+		string palavra=//palavra referente ao nó NODE
+		float pesotitulo=(conta(texto.titulo,palavra)/len(texto.titulo))*p_titulo;
+		float pesosubtitulo=(conta(texto.subtitulo,palavra)/len(texto.subtitulo))*p_subtitulo;
+		float pesocorpo=(conta(texto.corpo,palavra)/len(texto.corpo))*p_corpo;
+		NODE.peso=pesotitulo+pesosubtitulo+pesocorpo;
+	}
+	poda(gen);
+	return gen;
+}
+
+void save(tree arvore, int id){
+	//salva a árvore "arvore" no disco com o ID "id"
+}
+
+void save(tree arvore){
+	//salva a árvore SEM ID (apenas para armazenar a árvore grande)
+}
+
+
+int main(){
+
+	int p_titulo=50; //Peso da palavra no título. Valor arbitrário. Passivel de alteração
+	int p_subtitulo=20; //Peso da palavra no stítulo. Valor arbitrário. Passivel de alteração
+	int p_corpo=1; //Peso da palavra no corpo do texto. Valor arbitrário. Passivel de alteração
+
+	tree small_tree;
+	for(t=0;t<QTD_TEXTOS;T++){ //Percorre individualmente cada texto
+		file texto=read(t);
+		small_tree=first_read(texto,p_titulo,p_subtitulo,p_corpo));
+		save(small_tree,t);
+	}
+	delete small_tree;
+	//Montadas todas as árvores pequenas, monta-se a grande (processo separado para que possa mais facilmente ser interrompido sem)
+	tree arvore_final;
+	for(t=0;t<QTD_TEXTOS;T++){
+		merge(arvore_final,abre(id));
+	}
+	poda(arvore_final);
+	save(arvore_final);
+	return 0;
+}
