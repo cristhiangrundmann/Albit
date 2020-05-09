@@ -1,6 +1,6 @@
-<? 
-include_once"config.php";
-if(isset($_POST['register'])){
-    $search_key = $_POST['search_key'];
+<?php
+if (isset($_POST['search_key'])){
+    /*Incluir código de busca*/
+    include 'test.html';
 }
 ?>

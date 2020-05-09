@@ -28,3 +28,11 @@
     cursor: pointer;
     font-size: 20;
 }
+img{
+    vertical-align: middle;
+}
+.titulo{
+    font-size: 20;
+    color: #0f00b3;
+    font-family: Arial;
+}
