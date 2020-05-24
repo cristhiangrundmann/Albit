@@ -6,22 +6,25 @@
 
 using namespace std;
 
-void* get_file(string name) {
+void* Load_on_RAM(string filename) {
 
-    ifstream file(name, ios::binary | ios::ate);
+    ifstream file(filename, ios::binary | ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
+    
+    if (!file.good())
+        return nullptr;
     
     void* data = malloc(size);
     if (!data)
         return nullptr;
 
-    if (file.read((char*)data, size)) {
-    
-        return data;        
-    
+    if (file.read((char*)data, size)) {   
+        file.close();
+        return data;
     }
 
+    file.close();
     free(data);
     return nullptr;
 
@@ -36,8 +39,7 @@ struct Title_Data {
 Title_Data* titles_data;
 char* titles_names;
 
-
-string get_title_name(int id) {
+string Get_Title_Name(int id) {
 
     Title_Data data = titles_data[id];
     
@@ -56,8 +58,8 @@ string get_title_name(int id) {
 
 int main(int argc, char** argv) {
 
-    titles_data = (Title_Data*) get_file("titles/titles_data");
-    titles_names = (char*) get_file("titles/titles_names");
+    titles_data = (Title_Data*) Load_on_RAM("titles/titles_data");
+    titles_names = (char*) Load_on_RAM("titles/titles_names");
 
     if (!titles_data || !titles_names)
         return -1;
@@ -66,7 +68,7 @@ int main(int argc, char** argv) {
     if (argc > 1)
         n = atoi(argv[1]);
 
-    string title_n = get_title_name(n);
+    string title_n = Get_Title_Name(n);
     printf("%s\n", title_n.c_str());
 
     free(titles_data);
