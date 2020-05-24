@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <iostream>
 #include <vector>
 
 using std::vector;
@@ -16,7 +17,6 @@ char *buf_get, *buf_set, *line, span;
 size_t linelen;
 
 
-int count = 0;
 struct NODE
 {
     int next[10+26];
@@ -25,7 +25,6 @@ struct NODE
 
     NODE()
     {
-        count++;
         for(int i = 0; i < 10+26; i++) next[i] = -1;
         list = -1;
         num = -1;
@@ -131,7 +130,8 @@ void process_line()
         }
         n = k;
     }
-    *c = 0;
+    //*c = 0;
+
 
     if(trie[n].list == -1)
     {
@@ -139,6 +139,9 @@ void process_line()
         vector<int> list;
         lists.push_back(list);
     }
+
+    if(lists[trie[n].list].size() > 0) if(lists[trie[n].list].back() == id) return;
+
 
     lists[trie[n].list].push_back(id);
     trie[n].num++;
@@ -195,15 +198,46 @@ int main()
 
     time_t time0 = time(0);
 
-    for(int i = 0; i < 164; i++)
+    for(int i = 0; i < 1; i++)
     {
-        printf("::%d:: -- nodes: %d\n", i, count);
+        printf("::%d::", i);
         char filename[24];
         sprintf(filename, "./database/db%d", i);
         process_file(filename);
     }
 
     printf("Time = %lu\n", time(0) - time0);
+
+    printf("Agora pesquisa nessa coisa\n");
+
+    while(1)
+    {
+        char word[32];
+        std::cin >> word;
+
+        int n = 0;
+        for(char *c = word; *c; c++)
+        {
+            int i;
+            if(*c >= 'A' && *c <= 'Z') *c |= 32;
+
+            if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
+            else if(*c >= '0' && *c <= '9') i = *c - '0';
+            else continue;
+
+            int k = trie[n].next[i];
+
+            if(k == -1) break;
+            n = k;
+        }
+
+        
+
+        for(int i = 0; i < lists[trie[n].list].size(); i++)
+        {
+            printf("%d\n", lists[trie[n].list][i]);
+        }
+    }
 
     return 0;
 }
