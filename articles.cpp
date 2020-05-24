@@ -2,6 +2,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <vector>
+
+using std::vector;
 
 #define BUFFERSIZE 0x10000
 
@@ -12,20 +15,24 @@ char buffer_l[BUFFERSIZE + 1];
 char *buf_get, *buf_set, *line, span;
 size_t linelen;
 
+
+
 struct NODE
 {
-    char type; //
-    union
+    int next[10+26];
+    int list;
+    int num;
+
+    NODE()
     {
-        //$ 0-9 a-z
-        NODE* char_next[1 + 10 + 26];
-
-        int docs[64];
-        NODE *docs_next;
-
-
-    };
+        for(int i = 0; i < 10+26; i++) next[i] = -1;
+        list = -1;
+        num = -1;
+    }
 };
+
+vector<vector<int>> lists;
+vector<NODE> trie;
 
 char make_line()
 {
@@ -95,15 +102,46 @@ char process_tags()
     return 1;
 }
 
-char ccc[256];
-
 void process_line()
 {
     if(!make_line()) return;
 
     if(process_tags()) return;
 
-    
+    int n = 0;
+
+    for(char *c = buffer_l; *c != ' '; c++)
+    {
+        int i;
+        if(*c >= 'A' && *c <= 'Z') *c |= 32;
+
+        if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
+        else if(*c >= '0' && *c <= '9') i = *c - '0';
+        else continue;
+
+        int k = trie[0].next[i];
+
+        if(k == -1)
+        {
+            k = trie.size();
+            NODE node;
+            trie.push_back(node);
+            n = k;
+        }
+    }
+
+    if(trie[n].list == -1)
+    {
+        trie[n].list = lists.size();
+        vector<int> list;
+        lists.push_back(list);
+    }
+
+    lists[trie[n].list].push_back(id);
+    trie[n].num++;
+
+
+    exit(0);
 
     
 }
@@ -151,7 +189,8 @@ void process_file(const char *filename)
 int main()
 {
 
-  
+    NODE root;
+    trie.push_back(root);
 
     time_t time0 = time(0);
 
