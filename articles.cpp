@@ -117,7 +117,7 @@ void process_line()
 
         if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
         else if(*c >= '0' && *c <= '9') i = *c - '0';
-        else return;
+        else continue;
 
         int k = trie[n].next[i];
 
@@ -235,7 +235,7 @@ int main()
             if(k == -1) 
             {
                 good = 0;
-                break;
+                continue;
             }
             n = k;
         }
