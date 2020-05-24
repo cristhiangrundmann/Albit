@@ -1,0 +1,38 @@
+#interna {
+    left:50%;
+    top:50%;
+    margin-left:-300px;
+    margin-top:-250px;
+    position:absolute;
+    width:600px;
+    height:400;
+    color: black;
+    }
+
+.searchbox{
+    width: 500px;
+    height: 35px;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 20;
+}
+.buttons{   
+    padding: 10px 15px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20;
+}
+img{
+    vertical-align: middle;
+}
+.titulo{
+    font-size: 20;
+    color: #0f00b3;
+    font-family: Arial;
+}
