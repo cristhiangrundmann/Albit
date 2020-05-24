@@ -3,7 +3,6 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -13,7 +12,6 @@ using namespace std;
 
 
 // GET TITLE ###################################
-
 size_t find_nth(string& str, char pat, int n) {
 
     int begin, end, delta;
@@ -62,37 +60,63 @@ string get_title(string& line) {
     return line.substr(begin + 1, end - begin - 1);
 
 }
-
 // #############################################
 
 
 
 
+// Title class #################################
+// It's just a string that stores three ints
+class Title : public string {
 
+	public:
+
+	int offset, database, database_offset;
+
+    Title(string name) {
+
+        this->assign(name);
+
+    }
+
+};
+// #############################################
 
 
 
 
 int main() {
-    
+
+    vector<Title> title_list;
+    string file_name;
+
+    title_list.reserve(10000 * 160);
+
+    // Armazena todos os títulos em um vetor de strings
 	for (int i = 0; i < 164; i++) {
-
-        vector<string> title_list;
         
-        string name("database/db");
-        name += to_string(i);
-        cout << name << endl;
+        file_name = "database/db";
+        file_name += to_string(i);
+        cout << file_name << endl;
 
-        ifstream db(name);
+        ifstream db(file_name);
         string line;
         if (db.is_open()) {
-
-            title_list.reserve(10000);
             
             while (getline(db, line)) {
             
-                if (line.compare(0, 5, "<doc ") == 0)
-                    title_list.push_back(get_title(line));
+                if (line.compare(0, 5, "<doc ") == 0) {
+                    
+                    int pos = db.tellg();
+
+                    Title title(get_title(line));
+
+                    title.database = i;
+                    title.database_offset = pos;
+                    
+                    title_list.push_back(title);
+
+                }
 
             }
 
@@ -100,19 +124,39 @@ int main() {
         
         }
 
-        sort(title_list.begin(), title_list.end());
-
-        string name2("titles/titles");
-        name2 += to_string(i);
-
-        ofstream titles(name2);
-        for (string title : title_list)
-            titles << title << endl;
-        
-        titles.close();
-
-
     }
+
+    // Salva todos os títulos em um arquivo
+    // O id do título é a posição dele nesse arquivo
+    cout << "Saving titles file" << endl;
+    file_name = "titles/all_titles";
+    ofstream titles(file_name);
+    for (Title& title : title_list) {
+        title.offset = titles.tellp();
+        titles << title << endl;
+    }
+    titles.close();
+
+    // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
+    cout << "Saving offsets csv" << endl;
+    file_name = "titles/titles_id.csv";
+    ofstream ids_csv(file_name);
+    ids_csv << "\"offset\", \"database\", \"database offset\"\n";
+    for (Title& title : title_list) {
+        ids_csv << title.offset << "," << title.database << "," << title.database_offset << endl;
+    }
+    ids_csv.close();
+
+    // Salva a tabela para recuperar offset, database e database_offset a partir do id do título
+    cout << "Saving offsets" << endl;
+    file_name = "titles/titles_id";
+    ofstream ids(file_name, ios::binary);
+    for (Title& title : title_list) {
+        ids.write((char*)&title.offset, sizeof(int));
+        ids.write((char*)&title.database, sizeof(int));
+        ids.write((char*)&title.database_offset, sizeof(int));
+    }
+    ids.close();
 
     return 0;
 
