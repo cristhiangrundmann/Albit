@@ -70,7 +70,7 @@ string get_title(string& line) {
 
 struct Title_Data {
 
-    int32_t offset, database, database_offset;
+    uint32_t offset, database, database_offset;
 
 };
 
