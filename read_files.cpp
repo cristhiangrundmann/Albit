@@ -32,14 +32,14 @@ void* Load_on_RAM(string filename) {
 
 struct Title_Data {
 
-    int32_t offset, database, database_offset;
+    uint32_t offset, database, database_offset;
 
 };
 
 Title_Data* titles_data;
 char* titles_names;
 
-string Get_Title_Name(int id) {
+void Print_Title_Data(int id) {
 
     Title_Data data = titles_data[id];
     
@@ -49,10 +49,9 @@ string Get_Title_Name(int id) {
     while (*end != '\n')
         end++;
     
-    string result;
-    result.assign(start, end - start);
+    printf("%.*s\n", (int)(end - start), start);
+    printf("On db%u position %u\n", data.database, data.database_offset);
 
-    return result;
 
 }
 
@@ -68,8 +67,7 @@ int main(int argc, char** argv) {
     if (argc > 1)
         n = atoi(argv[1]);
 
-    string title_n = Get_Title_Name(n);
-    printf("%s\n", title_n.c_str());
+    Print_Title_Data(n);
 
     free(titles_data);
     free(titles_names);
