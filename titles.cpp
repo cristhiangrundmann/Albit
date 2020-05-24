@@ -3,7 +3,6 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
@@ -72,7 +71,7 @@ class Title : public string {
 
 	public:
 
-	int file, pos, id;
+	int offset, database, database_offset;
 
     Title(string name) {
 
@@ -111,8 +110,9 @@ int main() {
                     int pos = db.tellg();
 
                     Title title(get_title(line));
-                    title.file = i;
-                    title.pos = pos;
+
+                    title.database = i;
+                    title.database_offset = pos;
                     
                     title_list.push_back(title);
 
@@ -126,27 +126,33 @@ int main() {
 
     }
 
-    // Ordena eles
-    /*cout << "Sorting titles" << endl;
-    sort(title_list.begin(), title_list.end());*/
-
     // Salva todos os títulos em um arquivo
     // O id do título é a posição dele nesse arquivo
     cout << "Saving titles file" << endl;
     file_name = "titles/all_titles";
     ofstream titles(file_name);
     for (Title& title : title_list) {
-        title.id = titles.tellp();
+        title.offset = titles.tellp();
         titles << title << endl;
     }
     titles.close();
 
-    // Salva um csv com (id do título, database que ele está, posição no database que ele está) de cada título
-    cout << "Saving ids file" << endl;
-    file_name = "titles/titles_id";
-    ofstream ids(file_name);
+    // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
+    cout << "Saving offsets csv" << endl;
+    file_name = "titles/titles_id.csv";
+    ofstream ids_csv(file_name);
+    ids_csv << "\"offset\", \"database\", \"database offset\"\n";
     for (Title& title : title_list) {
-        ids << title.id << "," << title.file << "," << title.pos << endl;
+        ids_csv << title.offset << "," << title.database << "," << title.database_offset << endl;
+    }
+    ids_csv.close();
+
+    // Salva a tabela para recuperar offset, database e database_offset a partir do id do título
+    cout << "Saving offsets" << endl;
+    file_name = "titles/titles_id";
+    ofstream ids(file_name, ios::out | ios::binary);
+    for (Title& title : title_list) {
+        ids << title.offset << title.database << title.database_offset;
     }
     ids.close();
 
