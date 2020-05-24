@@ -150,9 +150,11 @@ int main() {
     // Salva a tabela para recuperar offset, database e database_offset a partir do id do título
     cout << "Saving offsets" << endl;
     file_name = "titles/titles_id";
-    ofstream ids(file_name, ios::out | ios::binary);
+    ofstream ids(file_name, ios::binary);
     for (Title& title : title_list) {
-        ids << title.offset << title.database << title.database_offset;
+        ids.write((char*)&title.offset, sizeof(int));
+        ids.write((char*)&title.database, sizeof(int));
+        ids.write((char*)&title.database_offset, sizeof(int));
     }
     ids.close();
 
