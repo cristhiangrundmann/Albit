@@ -117,7 +117,7 @@ void process_line()
 
         if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
         else if(*c >= '0' && *c <= '9') i = *c - '0';
-        else continue;
+        else return;
 
         int k = trie[n].next[i];
 
@@ -216,6 +216,7 @@ int main()
         std::cin >> word;
 
         int n = 0;
+        char good = 1;
         for(char *c = word; *c; c++)
         {
             int i;
@@ -223,16 +224,24 @@ int main()
 
             if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
             else if(*c >= '0' && *c <= '9') i = *c - '0';
-            else continue;
+            else 
+            {
+                good = 0;
+                break;
+            }
 
             int k = trie[n].next[i];
 
-            if(k == -1) break;
+            if(k == -1) 
+            {
+                good = 0;
+                break;
+            }
             n = k;
         }
 
         
-
+        if(good)
         for(int i = 0; i < lists[trie[n].list].size(); i++)
         {
             printf("%d\n", lists[trie[n].list][i]);
