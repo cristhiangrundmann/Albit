@@ -16,7 +16,7 @@ char *buf_get, *buf_set, *line, span;
 size_t linelen;
 
 
-
+int count = 0;
 struct NODE
 {
     int next[10+26];
@@ -25,6 +25,7 @@ struct NODE
 
     NODE()
     {
+        count++;
         for(int i = 0; i < 10+26; i++) next[i] = -1;
         list = -1;
         num = -1;
@@ -109,8 +110,8 @@ void process_line()
     if(process_tags()) return;
 
     int n = 0;
-
-    for(char *c = buffer_l; *c != ' '; c++)
+    char *c = buffer_l;
+    for(; *c != ' '; c++)
     {
         int i;
         if(*c >= 'A' && *c <= 'Z') *c |= 32;
@@ -119,16 +120,18 @@ void process_line()
         else if(*c >= '0' && *c <= '9') i = *c - '0';
         else continue;
 
-        int k = trie[0].next[i];
+        int k = trie[n].next[i];
 
         if(k == -1)
         {
             k = trie.size();
+            trie[n].next[i] = k;
             NODE node;
             trie.push_back(node);
-            n = k;
         }
+        n = k;
     }
+    *c = 0;
 
     if(trie[n].list == -1)
     {
@@ -140,10 +143,8 @@ void process_line()
     lists[trie[n].list].push_back(id);
     trie[n].num++;
 
-
-    exit(0);
-
-    
+    //printf("%s\n", buffer_l);
+    //exit(0);    
 }
 
 void process_file(const char *filename)
@@ -196,7 +197,7 @@ int main()
 
     for(int i = 0; i < 164; i++)
     {
-        printf("::%d::\n", i);
+        printf("::%d:: -- nodes: %d\n", i, count);
         char filename[24];
         sprintf(filename, "./database/db%d", i);
         process_file(filename);
