@@ -127,8 +127,8 @@ int main() {
     }
 
     // Ordena eles
-    cout << "Sorting titles" << endl;
-    sort(title_list.begin(), title_list.end());
+    /*cout << "Sorting titles" << endl;
+    sort(title_list.begin(), title_list.end());*/
 
     // Salva todos os títulos em um arquivo
     // O id do título é a posição dele nesse arquivo
