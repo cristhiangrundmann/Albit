@@ -12,6 +12,21 @@ char buffer_l[BUFFERSIZE + 1];
 char *buf_get, *buf_set, *line, span;
 size_t linelen;
 
+struct NODE
+{
+    char type; //
+    union
+    {
+        //$ 0-9 a-z
+        NODE* char_next[1 + 10 + 26];
+
+        int docs[64];
+        NODE *docs_next;
+
+
+    };
+};
+
 char make_line()
 {
     if(linelen >= BUFFERSIZE)
@@ -26,7 +41,10 @@ char make_line()
     return 1;
 }
 
-void process_tags()
+char *title_str;
+int id = -1;
+
+char process_tags()
 {
     static const char *doctag = "<doc ";
     const char *tag = doctag;
@@ -34,12 +52,13 @@ void process_tags()
 
     for(; *tag; tag++)
     {
-        if(*tag != *cur) return;
+        if(*tag != *cur) return 0;
         cur++;
     }
 
     int quos = 0;
-    char *title_str;
+    
+    //char *id_str;
 
     for(; *cur; cur++)
     if(*cur == '"') 
@@ -52,7 +71,7 @@ void process_tags()
         }
     }
 
-    if(quos != 3) return;
+    if(quos != 3) return 0;
 
     quos = 0;
 
@@ -62,21 +81,31 @@ void process_tags()
     if(*cur == '"')
     {
         quos++;
-        if(quos == 7) 
+        //if(quos == 1) *cur = 0;
+        //if(quos == 2) id = atoi(cur+1);
+        if(quos == 7)
         {
             *cur = 0;
             break;
         }
     }
 
-    if(quos != 7) return;
+    if(quos != 7) return 0;
+    id++;
+    return 1;
 }
+
+char ccc[256];
 
 void process_line()
 {
     if(!make_line()) return;
 
-    process_tags();
+    if(process_tags()) return;
+
+    
+
+    
 }
 
 void process_file(const char *filename)
@@ -104,7 +133,7 @@ void process_file(const char *filename)
             {
                 *cur = 0;
                 process_line();
-            
+        
                 line = cur + 1;
                 span = 0;
                 linelen = 0;
@@ -121,6 +150,9 @@ void process_file(const char *filename)
 
 int main()
 {
+
+  
+
     time_t time0 = time(0);
 
     for(int i = 0; i < 164; i++)
