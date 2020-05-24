@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cstdint>
 
 using namespace std;
 
@@ -66,12 +67,19 @@ string get_title(string& line) {
 
 
 // Title class #################################
+
+struct Title_Data {
+
+    int32_t offset, database, database_offset;
+
+};
+
 // It's just a string that stores three ints
 class Title : public string {
 
 	public:
 
-	int offset, database, database_offset;
+	Title_Data data;
 
     Title(string name) {
 
@@ -111,8 +119,8 @@ int main() {
 
                     Title title(get_title(line));
 
-                    title.database = i;
-                    title.database_offset = pos;
+                    title.data.database = i;
+                    title.data.database_offset = pos;
                     
                     title_list.push_back(title);
 
@@ -129,32 +137,30 @@ int main() {
     // Salva todos os títulos em um arquivo
     // O id do título é a posição dele nesse arquivo
     cout << "Saving titles file" << endl;
-    file_name = "titles/all_titles";
+    file_name = "titles/titles_names";
     ofstream titles(file_name);
     for (Title& title : title_list) {
-        title.offset = titles.tellp();
+        title.data.offset = titles.tellp();
         titles << title << endl;
     }
     titles.close();
 
     // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
     cout << "Saving offsets csv" << endl;
-    file_name = "titles/titles_id.csv";
+    file_name = "titles/titles_data.csv";
     ofstream ids_csv(file_name);
     ids_csv << "\"offset\", \"database\", \"database offset\"\n";
     for (Title& title : title_list) {
-        ids_csv << title.offset << "," << title.database << "," << title.database_offset << endl;
+        ids_csv << title.data.offset << "," << title.data.database << "," << title.data.database_offset << endl;
     }
     ids_csv.close();
 
     // Salva a tabela para recuperar offset, database e database_offset a partir do id do título
     cout << "Saving offsets" << endl;
-    file_name = "titles/titles_id";
+    file_name = "titles/titles_data";
     ofstream ids(file_name, ios::binary);
     for (Title& title : title_list) {
-        ids.write((char*)&title.offset, sizeof(int));
-        ids.write((char*)&title.database, sizeof(int));
-        ids.write((char*)&title.database_offset, sizeof(int));
+        ids.write((char*)&title.data, sizeof(Title_Data));
     }
     ids.close();
 
