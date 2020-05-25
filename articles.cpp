@@ -78,7 +78,11 @@ char process_tags()
         }
     }
 
-    if(quos != 3) return 0;
+    if(quos != 3)
+    {
+        
+        return 0;
+    }
 
     quos = 0;
 
@@ -97,7 +101,12 @@ char process_tags()
         }
     }
 
-    if(quos != 7) return 0;
+    if(quos != 7) 
+    {
+        printf("%s\n", buffer_l);
+        printf("%ld\n", linelen);
+        return 0;
+    }
     id++;
     return 1;
 }
@@ -108,8 +117,14 @@ void process_line()
 
     if(process_tags()) return;
 
+    
+
     int n = 0;
     char *c = buffer_l;
+    if(*c == ' ')
+    {
+        return;
+    }
     for(; *c != ' '; c++)
     {
         int i;
@@ -198,9 +213,9 @@ int main()
 
     time_t time0 = time(0);
 
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < 20; i++)
     {
-        printf("::%d::", i);
+        printf("db%d\n", i);
         char filename[24];
         sprintf(filename, "./database/db%d", i);
         process_file(filename);
@@ -226,8 +241,8 @@ int main()
             else if(*c >= '0' && *c <= '9') i = *c - '0';
             else 
             {
-                good = 0;
-                break;
+                //good = 0;
+                continue;
             }
 
             int k = trie[n].next[i];
@@ -235,7 +250,7 @@ int main()
             if(k == -1) 
             {
                 good = 0;
-                continue;
+                break;
             }
             n = k;
         }
