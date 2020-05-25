@@ -133,10 +133,7 @@ void process_line()
 
     int n = 0;
     char *c = line;
-    if(*c == ' ')
-    {
-        return;
-    }
+
     for(; *c != ' '; c++)
     {
         int i;
@@ -156,7 +153,10 @@ void process_line()
         n = k;
     }
 
-
+    if(n == 0)
+    {
+        return;
+    }
 
     if(trie[n].list == -1)
     {
