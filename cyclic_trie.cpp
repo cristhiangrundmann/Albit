@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 #include <vector>
 #include <string>
 
@@ -6,8 +6,7 @@ using namespace std;
 
 
 enum {
-
-    END, NON,
+    LST, NON,
     
     C_0, C_1, C_2, C_3,
     C_4, C_5, C_6, C_7,
@@ -51,7 +50,7 @@ struct Node {
     Node() {
 
         for (int i = 0; i < NODE_CHILDS; i++)
-            next[i] = -1; //0;
+            next[i] = -1;
 
     }
 
@@ -62,6 +61,38 @@ struct CTrie {
     vector<Node> nodes;
     vector<string> lists;
 
+    string get_results(const char* word) {
+
+        int id = find(word);
+
+        if (id >= 0)
+            return lists[id];
+
+        return string("NOT_FOUND");
+
+    }
+
+    int find(const char* word) {
+
+        int current_node = 0;
+
+        for (const char* c = word; *c != '\0'; c++) {
+
+            int next_id = ISO_8859[*c];
+            if (next_id == NON)
+                continue;
+
+            if(nodes[current_node].next[next_id] == -1)
+                return -1;
+            
+            current_node = nodes[current_node].next[next_id];
+
+        }
+
+        return nodes[current_node].next[LST];
+
+    }
+
     void add_word(const char* word) {
 
         int current_node = 0;
@@ -69,7 +100,9 @@ struct CTrie {
         for (const char* c = word; *c != '\0'; c++) {
 
             int next_id = ISO_8859[*c];
-
+            if (next_id == NON)
+                continue;
+            
             if (nodes[current_node].next[next_id] == -1) {
 
                 nodes[current_node].next[next_id] = nodes.size();
@@ -83,7 +116,8 @@ struct CTrie {
 
         if (current_node != 0) {
 
-            nodes[current_node].next[END] = lists.size();
+            nodes[current_node].next[LST] = lists.size();
+            lists.push_back(word);
 
         }
 
@@ -108,7 +142,12 @@ int main() {
     trie.add_word("Abacaxi");
     trie.add_word("aba");
 
-    printf("%lu\n", trie.nodes.size());
+    cout << trie.nodes.size() << endl;
+    cout << trie.get_results("ABA") << endl;
+    cout << trie.get_results("SAKA") << endl;
+    cout << trie.get_results("Ab aCaTe") << endl;
+    cout << trie.get_results("AbaCaxI") << endl;
 
+    return 0;
 
 }
