@@ -16,6 +16,40 @@ using std::ifstream;
 char line[BUFFERSIZE];
 size_t linelen;
 
+enum {
+    C_0, C_1, C_2, C_3,
+    C_4, C_5, C_6, C_7,
+    C_8, C_9,
+    
+    C_A, C_B, C_C, C_D, C_E,
+    C_F, C_G, C_H, C_I, C_J,
+    C_K, C_L, C_M, C_N, C_O,
+    C_P, C_Q, C_R, C_S,
+    C_T, C_U, C_V, C_W,
+    C_X, C_Y, C_Z,
+
+    NON, END
+};
+
+int ISO_8859[256] = {
+    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    C_0, C_1, C_2, C_3, C_4, C_5, C_6, C_7, C_8, C_9, NON, NON, NON, NON, NON, NON,
+    C_A, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
+    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
+    NON, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
+    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
+    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    NON, NON, C_C, C_L, C_C, C_Y, C_S, NON, C_S, C_C, C_A, NON, NON, NON, C_R, NON,
+    C_O, NON, C_2, C_3, C_Z, C_U, NON, NON, C_Z, C_1, C_O, NON, C_O, C_O, C_Y, NON,
+    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
+    C_D, C_N, C_O, C_O, C_O, C_O, C_O, C_X, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_S,
+    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
+    C_D, C_N, C_O, C_O, C_O, C_O, C_O, NON, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_Y
+};
+
 
 struct NODE
 {
@@ -106,11 +140,9 @@ void process_line()
     for(; *c != ' '; c++)
     {
         int i;
-        if(*c >= 'A' && *c <= 'Z') *c |= 32;
+        i = (char)ISO_8859[(unsigned char)*c];
 
-        if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
-        else if(*c >= '0' && *c <= '9') i = *c - '0';
-        else continue;
+        if(i == NON) continue;
 
         int k = trie[n].next[i];
 
@@ -186,15 +218,8 @@ int main()
         for(char *c = word; *c; c++)
         {
             int i;
-            if(*c >= 'A' && *c <= 'Z') *c |= 32;
-
-            if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
-            else if(*c >= '0' && *c <= '9') i = *c - '0';
-            else 
-            {
-                //good = 0;
-                continue;
-            }
+            i = ISO_8859[(unsigned char)*c];
+            if(i == NON) continue;
 
             int k = trie[n].next[i];
 
