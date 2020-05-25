@@ -196,7 +196,7 @@ int main()
 
     time_t time0 = time(0);
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 5; i++)
     {
         printf("db%d\n", i);
         char filename[24];
@@ -229,6 +229,13 @@ int main()
                 break;
             }
             n = k;
+        }
+
+        int list = trie[n].list;
+        if(list < 0)
+        {
+            printf("No matches\n");
+            continue;
         }
 
         
