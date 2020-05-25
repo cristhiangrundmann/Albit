@@ -141,7 +141,7 @@ int main() {
     ofstream titles(file_name);
     for (Title& title : title_list) {
         title.data.offset = titles.tellp();
-        titles << title << endl;
+        titles << title << (char)0 << endl;
     }
     titles.close();
 

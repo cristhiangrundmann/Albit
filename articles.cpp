@@ -188,6 +188,14 @@ void process_file(const char *filename)
 
 }
 
+struct Title_Data {
+
+    uint32_t offset, database, database_offset;
+
+} *titles_data;
+
+char *titles_names;
+
 int main()
 {
 
@@ -205,6 +213,26 @@ int main()
     }
 
     printf("Time = %lu\n", time(0) - time0);
+
+    ifstream ifs("titles/titles_data", std::ios::binary);
+    if(!ifs.is_open()) return 1;
+    ifs.seekg (0, ifs.end);
+    long size = ifs.tellg();
+    ifs.seekg(0);
+    titles_data = (Title_Data*)(new char[size]);
+    if(!titles_data) return 2;
+    ifs.read((char*)titles_data, size);
+    ifs.close();
+
+    ifs.open("titles/titles_names", std::ios::binary);
+    if(!ifs.is_open()) return 1;
+    ifs.seekg (0, ifs.end);
+    size = ifs.tellg();
+    ifs.seekg(0);
+    titles_names = new char[size];
+    if(!titles_names) return 2;
+    ifs.read(titles_names, size);
+    ifs.close();
 
     printf("Agora pesquisa nessa coisa\n");
 
@@ -237,9 +265,14 @@ int main()
 
         
         if(good)
-        for(int i = 0; i < lists[trie[n].list].size(); i++)
         {
-            printf("%d\n", lists[trie[n].list][i]);
+            printf("Found %ld results\n********\n", lists[trie[n].list].size());
+            for(int i = 0; i < lists[trie[n].list].size(); i++)
+            {
+                int __ID__ = lists[trie[n].list][i];
+                printf("Result %d: %s\n", i+1, &titles_names[titles_data[__ID__].offset]);
+            }
+            printf("********\n");
         }
         else printf("No matches\n");
     }
