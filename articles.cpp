@@ -3,17 +3,17 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <string>
 #include <vector>
+#include <fstream>
 
 using std::vector;
+using std::string;
+using std::ifstream;
 
 #define BUFFERSIZE 0x10000
 
-char buffer_a[BUFFERSIZE + 1];
-char buffer_b[BUFFERSIZE + 1];
-char buffer_l[BUFFERSIZE + 1];
-
-char *buf_get, *buf_set, *line, span;
+char line[BUFFERSIZE];
 size_t linelen;
 
 
@@ -34,28 +34,15 @@ struct NODE
 vector<vector<int>> lists;
 vector<NODE> trie;
 
-char make_line()
-{
-    if(linelen >= BUFFERSIZE)
-    {
-        printf("Ignoring large line: %ld chars\n", linelen);
-        return 0;
-    }
 
-    strcpy(buffer_l, line);
-    if(span) strcat(buffer_l, buf_get);
-
-    return 1;
-}
-
-char *title_str;
+char *title;
 int id = -1;
 
 char process_tags()
 {
     static const char *doctag = "<doc ";
     const char *tag = doctag;
-    char *cur = buffer_l;
+    char *cur = line;
 
     for(; *tag; tag++)
     {
@@ -65,7 +52,6 @@ char process_tags()
 
     int quos = 0;
     
-    //char *id_str;
 
     for(; *cur; cur++)
     if(*cur == '"') 
@@ -73,23 +59,26 @@ char process_tags()
         quos++;
         if(quos == 3) 
         {
-            title_str = cur+1;
+            title = cur+1;
             break;
         }
     }
 
-    if(quos != 3) return 0;
+    if(quos != 3)
+    {
+        
+        return 0;
+    }
 
     quos = 0;
 
-    cur = buffer_l + linelen - 1;
+    cur = line + linelen - 1;
 
     for(; *cur; cur--)
     if(*cur == '"')
     {
         quos++;
-        //if(quos == 1) *cur = 0;
-        //if(quos == 2) id = atoi(cur+1);
+
         if(quos == 7)
         {
             *cur = 0;
@@ -98,18 +87,22 @@ char process_tags()
     }
 
     if(quos != 7) return 0;
+
     id++;
     return 1;
 }
 
 void process_line()
 {
-    if(!make_line()) return;
 
     if(process_tags()) return;
 
     int n = 0;
-    char *c = buffer_l;
+    char *c = line;
+    if(*c == ' ')
+    {
+        return;
+    }
     for(; *c != ' '; c++)
     {
         int i;
@@ -130,7 +123,7 @@ void process_line()
         }
         n = k;
     }
-    //*c = 0;
+
 
 
     if(trie[n].list == -1)
@@ -145,49 +138,22 @@ void process_line()
 
     lists[trie[n].list].push_back(id);
     trie[n].num++;
-
-    //printf("%s\n", buffer_l);
-    //exit(0);    
+  
 }
 
 void process_file(const char *filename)
 {
-    FILE *dbi = fopen(filename, "rb");
-    if(!dbi) return;
-
-    buf_get = buffer_a;
-    buf_set = buffer_b;
-
-    span = 0;
-    line = buf_set;
-
-    size_t len;
-
-    while(len = fread(buf_set, 1, BUFFERSIZE, dbi))
+    ifstream db(filename);
+    if(!db.is_open()) return;
+    string str;
+    while(getline(db, str))
     {
-        buf_set[len] = 0;
-        char *t = buf_set; buf_set = buf_get; buf_get = t;
-
-        char *cur = buf_get;
-        for(; *cur; cur++)
-        {
-            if(*cur == '\n')
-            {
-                *cur = 0;
-                process_line();
-        
-                line = cur + 1;
-                span = 0;
-                linelen = 0;
-                continue;
-            }
-            linelen++;
-        }
-        span = buf_get[len - 1] != '\n';
+        linelen = str.size();
+        strcpy(line, str.c_str());
+        process_line();
     }
-    process_line();
+    db.close();
 
-    fclose(dbi);
 }
 
 int main()
@@ -198,9 +164,9 @@ int main()
 
     time_t time0 = time(0);
 
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < 20; i++)
     {
-        printf("::%d::", i);
+        printf("db%d\n", i);
         char filename[24];
         sprintf(filename, "./database/db%d", i);
         process_file(filename);
@@ -216,6 +182,7 @@ int main()
         std::cin >> word;
 
         int n = 0;
+        char good = 1;
         for(char *c = word; *c; c++)
         {
             int i;
@@ -223,16 +190,24 @@ int main()
 
             if(*c >= 'a' && *c <= 'z') i = *c - 'a' + 10;
             else if(*c >= '0' && *c <= '9') i = *c - '0';
-            else continue;
+            else 
+            {
+                //good = 0;
+                continue;
+            }
 
             int k = trie[n].next[i];
 
-            if(k == -1) break;
+            if(k == -1) 
+            {
+                good = 0;
+                break;
+            }
             n = k;
         }
 
         
-
+        if(good)
         for(int i = 0; i < lists[trie[n].list].size(); i++)
         {
             printf("%d\n", lists[trie[n].list][i]);
