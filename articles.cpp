@@ -211,6 +211,7 @@ int main()
     while(1)
     {
         char word[32];
+        printf(">> ");
         std::cin >> word;
 
         int n = 0;
@@ -232,11 +233,7 @@ int main()
         }
 
         int list = trie[n].list;
-        if(list < 0)
-        {
-            printf("No matches\n");
-            continue;
-        }
+        if(list < 0) good = 0;
 
         
         if(good)
@@ -244,6 +241,7 @@ int main()
         {
             printf("%d\n", lists[trie[n].list][i]);
         }
+        else printf("No matches\n");
     }
 
     return 0;
