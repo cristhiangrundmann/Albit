@@ -122,6 +122,11 @@ int main() {
                     title.data.database = i;
                     title.data.database_offset = pos;
                     
+                    if (title.find("\"") != string::npos) {
+
+                        cout << title << title.data.database << endl;
+                    }
+
                     title_list.push_back(title);
 
                 }
@@ -141,19 +146,9 @@ int main() {
     ofstream titles(file_name);
     for (Title& title : title_list) {
         title.data.offset = titles.tellp();
-        titles << title << (char)0 << endl;
+        titles << title << '\0';
     }
     titles.close();
-
-    // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
-    cout << "Saving offsets csv" << endl;
-    file_name = "titles/titles_data.csv";
-    ofstream ids_csv(file_name);
-    ids_csv << "\"offset\", \"database\", \"database offset\"\n";
-    for (Title& title : title_list) {
-        ids_csv << title.data.offset << "," << title.data.database << "," << title.data.database_offset << endl;
-    }
-    ids_csv.close();
 
     // Salva a tabela para recuperar offset, database e database_offset a partir do id do título
     cout << "Saving offsets" << endl;
@@ -163,6 +158,16 @@ int main() {
         ids.write((char*)&title.data, sizeof(Title_Data));
     }
     ids.close();
+    
+    // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
+    cout << "Saving offsets csv" << endl;
+    file_name = "titles/titles_data.csv";
+    ofstream ids_csv(file_name);
+    ids_csv << "\"offset\", \"database\", \"database offset\"\n";
+    for (Title& title : title_list) {
+        ids_csv << title.data.offset << "," << title.data.database << "," << title.data.database_offset << endl;
+    }
+    ids_csv.close();
 
     return 0;
 
