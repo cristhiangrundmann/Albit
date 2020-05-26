@@ -4,10 +4,13 @@
 
 using namespace std;
 
+typedef uint8_t byte;
 
-enum {
-    LST, NON,
-    
+// Node content
+#define EMPTY -1
+
+// Node index
+enum { 
     C_0, C_1, C_2, C_3,
     C_4, C_5, C_6, C_7,
     C_8, C_9,
@@ -17,10 +20,12 @@ enum {
     C_K, C_L, C_M, C_N, C_O,
     C_P, C_Q, C_R, C_S,
     C_T, C_U, C_V, C_W,
-    C_X, C_Y, C_Z
+    C_X, C_Y, C_Z,
+
+    NON, END
 };
 
-int ISO_8859[256] = {
+byte ISO_8859[256] = {
     NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
     NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
     NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
@@ -39,6 +44,21 @@ int ISO_8859[256] = {
     C_D, C_N, C_O, C_O, C_O, C_O, C_O, NON, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_Y
 };
 
+vector<byte> Convert_ISO(const char* word) {
+
+    vector<byte> word_converted;
+
+    for (const byte* c = (byte*)word; *c != '\0'; c++) {
+        byte id = ISO_8859[*c];
+        if (id != NON)
+            word_converted.push_back(id);
+    }
+
+    word_converted.push_back(END);
+    return word_converted;
+
+}
+
 #define NODE_CHILDS 40
 
 struct Node {
@@ -50,7 +70,7 @@ struct Node {
     Node() {
 
         for (int i = 0; i < NODE_CHILDS; i++)
-            next[i] = -1;
+            next[i] = EMPTY;
 
     }
 
@@ -61,66 +81,114 @@ struct CTrie {
     vector<Node> nodes;
     vector<string> lists;
 
-    string get_results(const char* word) {
+    void print_entry(const char* word) {
 
         int id = find(word);
-
-        if (id >= 0)
-            return lists[id];
-
-        return string("NOT_FOUND");
+        if (id == EMPTY)
+            cout << word << "\t = **" << endl;
+        else
+            cout << word << "\t = " << lists[id] << endl;
 
     }
 
+    // Return -1 if it coudn't find word
     int find(const char* word) {
 
         int current_node = 0;
+        
+        vector<byte> vec = Convert_ISO(word);
+        const byte* data = vec.data();
 
-        for (const char* c = word; *c != '\0'; c++) {
+        for (; *data != END; data++) {
 
-            int next_id = ISO_8859[*c];
-            if (next_id == NON)
-                continue;
-
-            if(nodes[current_node].next[next_id] == -1)
-                return -1;
+            if(nodes[current_node].next[*data] == EMPTY)
+                //return -1;
+                return nodes[current_node].next[END];
             
-            current_node = nodes[current_node].next[next_id];
+            current_node = nodes[current_node].next[*data];
 
         }
 
-        return nodes[current_node].next[LST];
+        return nodes[current_node].next[END];
 
     }
 
-    void add_word(const char* word) {
+    void percorre_ate_proximo_vazio(const byte** data, int* node) {
 
-        int current_node = 0;
-        
-        for (const char* c = word; *c != '\0'; c++) {
-
-            int next_id = ISO_8859[*c];
-            if (next_id == NON)
-                continue;
+        for (; **data != END; (*data)++) {
             
-            if (nodes[current_node].next[next_id] == -1) {
+            if (nodes[*node].next[**data] == EMPTY)
+                return;
+            
+            *node = nodes[*node].next[**data];
 
-                nodes[current_node].next[next_id] = nodes.size();
-                nodes.push_back(Node());
+        }
+
+        // Aqui **data = END
+
+        // Chegou no fim da lista e tem uma palavra lá
+        if(nodes[*node].next[END] != EMPTY)
+            *data = nullptr;
+
+    }
+    // nodes[node].next[*data] will be empty
+
+    // Adapta a trie e retorna o nó em que a palavra pode ser inserida
+    int insert(const byte* data, int node) {
+
+        const byte* empty_data = data;
+        int empty_node = node;
+        percorre_ate_proximo_vazio(&empty_data, &empty_node);
+
+        // Se achou um nó vazio
+        if (empty_data) {
+
+            // E esse nó é o fim
+            if (*empty_data == END) {
+                // Insere a palavra aqui
+                return empty_node;
+            }
+            // Se esse nó não é o fim
+            else {
+
+                // Cria loop
+                nodes[empty_node].next[*empty_data] = empty_node;
+
+                const byte* next_data = empty_data;
+                int next_node = empty_node;
+                percorre_ate_proximo_vazio(&next_data, &next_node);
+
+                // Não tem nó vazio, desiste do loop
+                if (!next_data) {
+                    nodes[empty_node].next[*empty_data] = nodes.size();
+                    nodes.push_back(Node());
+                }
+
+                return insert(empty_data, empty_node);
 
             }
 
-            current_node = nodes[current_node].next[next_id];
+        }
+        else {
+
+            return -1;
 
         }
 
-        if (current_node != 0) {
+    }
 
-            nodes[current_node].next[LST] = lists.size();
+
+
+    void add_word(const char* word) {
+
+        vector<byte> vec = Convert_ISO(word);
+        int node = insert( vec.data(), 0 );
+        if (node == -1) {
+            printf("Can't insert %s\n", word);
+        } else {
+            nodes[node].next[END] = lists.size();
             lists.push_back(word);
-
         }
-
 
     }
 
@@ -132,21 +200,32 @@ struct CTrie {
 
 };
 
-
+char Words[][32] = {
+    "abacate",
+    "abacaxi",
+    "aba",//
+    "balao",
+    "batata",//
+    "tomate",
+    "cebola",
+    "carne",
+    "tombo",
+    "trem",
+    "trator",
+    "pokemon"
+};
 
 int main() {
 
     CTrie trie;
 
-    trie.add_word("Abacate");
-    trie.add_word("Abacaxi");
-    trie.add_word("aba");
+    for (int i = 0; i < sizeof(Words) / 32; i++)
+        trie.add_word(Words[i]);
 
-    cout << trie.nodes.size() << endl;
-    cout << trie.get_results("ABA") << endl;
-    cout << trie.get_results("SAKA") << endl;
-    cout << trie.get_results("Ab aCaTe") << endl;
-    cout << trie.get_results("AbaCaxI") << endl;
+    cout << trie.nodes.size() << " nodes" << endl;
+
+    for (int i = 0; i < sizeof(Words) / 32; i++)
+        trie.print_entry(Words[i]);
 
     return 0;
 
