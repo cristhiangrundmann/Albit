@@ -54,16 +54,27 @@ struct BASICNODE
 
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
+vector<int> basic_free;
 
 void make(int *n)
 {
-    if(*n == 0)
+    if(*n != 0) return;
+
+    BASICNODE *bn;
+    if(basic_free.size() > 0)
     {
-        BASICNODE *bn = new BASICNODE;
-        int b = -basic.size()-1;
-        basic.push_back(bn);
-        *n = b;
+        int b = basic_free.back();
+        basic_free.pop_back();
+        basic[b]->c = -1;
+        basic[b]->next = 0;
+        *n = -b-1;
+
+        return;
     }
+    bn = new BASICNODE;
+    int b = basic.size();
+    basic.push_back(bn);
+    *n = -b-1;
 }
 
 int insert(unsigned char *str)
@@ -90,7 +101,6 @@ int insert(unsigned char *str)
             char c = basic[b]->c;
             if(c == *str || c == -1)
             {
-                printf(".\n");
                 basic[b]->c = *str;
                 n = &basic[b]->next;
                 make(n);
@@ -100,9 +110,15 @@ int insert(unsigned char *str)
                 MULTINODE *mn = new MULTINODE;
                 int k = multi.size();
                 multi.push_back(mn);
+                basic_free.push_back(b);
+
+                int nc = mn->next[c];
                 mn->next[c] = basic[b]->next;
-                delete basic[b];
-                basic[b] = nullptr;
+                if(nc > 0) multi[nc]->list = basic[b]->list;
+                else if(nc < 0) basic[-nc-1]->list = basic[b]->list;
+                
+
+
                 *n = k;
                 n = &mn->next[*str];
                 make(n);
@@ -137,6 +153,13 @@ int main()
             printf("%d ", -i-1);
             basic[i]->print();
         }
+
+        printf("free: ");
+        for(int i = 0; i < basic_free.size(); i++) 
+        {
+            printf("%d ", -basic_free[i]-1);
+        }
+        printf("\n");
     }
 
     for(MULTINODE *m : multi) if(m) delete m;
