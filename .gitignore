@@ -1,4 +1,13 @@
 database/*
+database2/*
 titles/*
+trie/*
+
 .vscode/
 a.out
+~*
+
+!database/.keep
+!database2/.keep
+!titles/.keep
+!trie/.keep
