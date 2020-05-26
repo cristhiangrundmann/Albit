@@ -209,6 +209,20 @@ struct Title_Data {
 
 char *titles_names;
 
+int triecomp(int n)
+{
+    int sum = 0;
+    int c = 0;
+    for(int i = 0; i < 36; i++) 
+    {
+        if(trie[n].next[i] < 0) continue;
+        c++;
+        sum += triecomp(trie[n].next[i]);
+    }
+    if(c == 1) sum++;
+    return sum;
+}
+
 int main()
 {
 
@@ -217,7 +231,7 @@ int main()
 
     start();
 
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 1; i++)
     {
         printf("Processing database 'db%d'...\n", i);
         char filename[24];
@@ -228,6 +242,8 @@ int main()
     float t_prep = stop();
 
     printf("Pre-processing time: %f\n", t_prep);
+
+
 
     ifstream ifs("titles/titles_data", std::ios::binary);
     if(!ifs.is_open()) return 1;
