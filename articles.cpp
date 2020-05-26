@@ -65,6 +65,19 @@ struct NODE
     }
 };
 
+struct timespec t_start, t_end;
+void start()
+{
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_start);   
+}
+
+float stop()
+{
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t_end);
+    return ((t_end.tv_sec - t_start.tv_sec) * 1000000000 + 
+    (t_end.tv_nsec - t_start.tv_nsec)) / 1000000000.f;
+}
+
 vector<vector<int>> lists;
 vector<NODE> trie;
 
@@ -202,17 +215,19 @@ int main()
     NODE root;
     trie.push_back(root);
 
-    time_t time0 = time(0);
+    start();
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < 10; i++)
     {
-        printf("db%d\n", i);
+        printf("Processing database 'db%d'...\n", i);
         char filename[24];
         sprintf(filename, "./database/db%d", i);
         process_file(filename);
     }
 
-    printf("Time = %lu\n", time(0) - time0);
+    float t_prep = stop();
+
+    printf("Pre-processing time: %f\n", t_prep);
 
     ifstream ifs("titles/titles_data", std::ios::binary);
     if(!ifs.is_open()) return 1;
@@ -234,13 +249,14 @@ int main()
     ifs.read(titles_names, size);
     ifs.close();
 
-    printf("Agora pesquisa nessa coisa\n");
-
     while(1)
     {
         char word[32];
-        printf(">> ");
+        printf("\033[0;34m"); 
+        printf("Search >> ");
+        printf("\033[1;34m"); 
         std::cin >> word;
+        start();
 
         int n = 0;
         char good = 1;
@@ -263,18 +279,34 @@ int main()
         int list = trie[n].list;
         if(list < 0) good = 0;
 
+        float t_search = stop();
         
         if(good)
         {
-            printf("Found %ld results\n********\n", lists[trie[n].list].size());
+            int page = 20;
+            printf("\033[1;32m"); 
+            printf("Found %ld results (%f seconds)\n", lists[trie[n].list].size(), t_search);
             for(int i = 0; i < lists[trie[n].list].size(); i++)
             {
                 int __ID__ = lists[trie[n].list][i];
-                printf("Result %d: %s\n", i+1, &titles_names[titles_data[__ID__].offset]);
+                printf("\033[0;32m");
+                printf("Result %d: \033[0m%s\n", i+1, &titles_names[titles_data[__ID__].offset]);
+                page--;
+                if(page == 0)
+                {
+                    ASK_AGAIN:
+                    printf("\033[0;33m"); 
+                    printf("Do you want more results? (Y/N)\033[0m\n");
+                    char yn;
+                    std::cin >> yn;
+                    int i = ISO_8859[(unsigned char)yn];
+                    if(i == C_Y) page = 20;
+                    else if(i == C_N) break;
+                    else goto ASK_AGAIN;
+                }
             }
-            printf("********\n");
         }
-        else printf("No matches\n");
+        else printf("\033[0;31mNo matches\n");
     }
 
     return 0;
