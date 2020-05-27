@@ -23,13 +23,6 @@ struct MULTINODE
         list = -1;
         for(int i = 0; i < ALPHSIZE; i++) next[i] = 0;
     }
-
-    void print()
-    {
-        printf("Multi: ");
-        for(int i = 0; i < ALPHSIZE; i++) printf("%d, ", next[i]);
-        printf("\n");
-    }
 };
 
 struct BASICNODE
@@ -44,12 +37,6 @@ struct BASICNODE
         next = 0;
         c = -1;
     }
-
-    void print()
-    {
-        printf("Basic: c = %c, n = %d\n", c+'0', next);
-    }
-
 };
 
 vector<MULTINODE*> multi;
