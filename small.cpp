@@ -128,14 +128,14 @@ int find(unsigned char *str)
                 if(n >= 0) list = multi[n]->list;
                 else list = basic[-n-1]->list;
             }
-            else return -1;
+            else return -2;
         }
         else
         {
             int b = -n-1;
             char c = basic[b]->c;
             if(c != *str) return -1;
-            n = basic[b]->next;
+            n = basic[b]->next; if(n == 0) return -4;
             if(n >= 0) list = multi[n]->list;
             else list = basic[-n-1]->list;
         }
