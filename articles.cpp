@@ -209,20 +209,6 @@ struct Title_Data {
 
 char *titles_names;
 
-int triecomp(int n)
-{
-    int sum = 0;
-    int c = 0;
-    for(int i = 0; i < 36; i++) 
-    {
-        if(trie[n].next[i] < 0) continue;
-        c++;
-        sum += triecomp(trie[n].next[i]);
-    }
-    if(c == 1) sum++;
-    return sum;
-}
-
 int main()
 {
 

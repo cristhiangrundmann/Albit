@@ -318,6 +318,67 @@ struct Title_Data {
 
 char *titles_names;
 
+typedef uint8_t byte;
+
+const byte error[] = {0xF0, 0x9F, 0x96, 0x95, 0xEF, 0xB8, 0x8F, 0x00};
+
+void Print_UTF8(const char* word) {
+
+    const byte* array = (const byte*)word;
+
+    for(; *array != 0; array++) {
+
+        if (*array > 0x7F) {
+            // C2
+            if (*array >= 0xA0 && *array < 0xC0) {
+                switch(*array) {
+                    case(0xA0):
+                        printf(" ");
+                        continue;
+                    case(0xA4):
+                        printf("%c%c%c", 0xE2, 0x82, 0xAC);
+                        continue;
+                    case(0xA6):
+                        printf("%c%c", 0xC5, 0xA0);
+                        continue;
+                    case(0xA8):
+                        printf("%c%c", 0xC5, 0xA1);
+                        continue;
+                    case(0xB4):
+                        printf("%c%c", 0xC5, 0xBD);
+                        continue;
+                    case(0xB8):
+                        printf("%c%c", 0xC5, 0xBE);
+                        continue;
+                    case(0xBC):
+                        printf("%c%c", 0xC5, 0x92);
+                        continue;
+                    case(0xBD):
+                        printf("%c%c", 0xC5, 0x93);
+                        continue;
+                    case(0xBE):
+                        printf("%c%c", 0xC5, 0xB8);
+                        continue;
+                    default:
+                        printf("%c%c", 0xC2, *array);
+                        continue;
+                }
+            }
+            //C3
+            if (*array >= 0xC0 && *array <= 0xFF) {
+                printf("%c%c", 0xC3, (*array) - 0x40);
+                continue;
+            }
+            //ERROR
+            printf("%s", error);
+            continue;
+        }
+
+        printf("%c", *array);
+    }
+}
+
+
 int main()
 {
     multi.push_back(new MULTINODE);
@@ -383,7 +444,9 @@ int main()
             {
                 int __ID__ = lists[list][i];
                 printf("\033[0;32m");
-                printf("Result %d: \033[0m%s\n", i+1, &titles_names[titles_data[__ID__].offset]);
+                printf("Result %d: \033[0m", i+1);
+                Print_UTF8(&titles_names[titles_data[__ID__].offset]);
+                printf("\n");
                 page--;
                 if(page == 0)
                 {
