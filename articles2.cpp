@@ -13,9 +13,7 @@ using std::ifstream;
 
 #define BUFFERSIZE 0x10000
 
-char line[BUFFERSIZE];
-size_t linelen;
-
+string line;
 
 enum {
     C_0, C_1, C_2, C_3,
@@ -93,31 +91,44 @@ void make(int *n)
     if(*n != 0) return;
 
     BASICNODE *bn = new BASICNODE;
-    if(bn == nullptr)
-    {
-        //printf("BN FAIL\n");
-    }
-
     *n = -basic.size()-1;
     basic.push_back(bn);
 }
 
-void insert(unsigned char *str)
+void insert_iso(char*);
+
+void insert(char *str)
 {
+    char *t = str;
+
+    for(; *t; t++)
     {
-        unsigned char *t;
-        for(t = str; *t && *t != ' '; t++) *t = ISO_8859[(unsigned char)*t];
-        *t = ALPHSIZE;
+        if(*t == ' ')
+        {
+            *t = END;
+            insert_iso(str);
+            return;
+        }
+        *t = ISO_8859[(unsigned char)*t];
+        if((unsigned char)*t >= ALPHSIZE)
+        {
+            *t = END;
+            insert_iso(str);
+            str = t+1;
+        }
     }
-    
-    if(*str >= ALPHSIZE) return; 
+}
+
+void insert_iso(char *str)
+{    
+    if(*str == END) return;
 
     int *n = &multi[0]->next[*str];
     str++;
 
     make(n);
 
-    for(; *str < ALPHSIZE; str++)
+    for(; *str != END; str++)
     {
         if(*n > 0) 
         {
@@ -140,10 +151,8 @@ void insert(unsigned char *str)
                 int k = multi.size();
                 multi.push_back(mn);
 
-                int nc = mn->next[c];
                 mn->next[c] = basic[b]->next;
-                if(nc > 0) multi[nc]->list = basic[b]->list;
-                else if(nc < 0) basic[-nc-1]->list = basic[b]->list;
+                mn->list = basic[b]->list;
                 
                 *n = k;
                 n = &mn->next[*str];
@@ -172,17 +181,18 @@ void insert(unsigned char *str)
     lists[*llist].push_back(id);
 }
 
-int find(unsigned char *str)
+int find(char *str)
 {
     {
-        unsigned char *t;
+        char *t;
         for(t = str; *t && *t != ' '; t++) *t = ISO_8859[(unsigned char)*t];
-        *t = ALPHSIZE;
+        *t = END;
     }
 
     int n = 0, list = -1;
-    for(; *str < ALPHSIZE; str++)
+    for(; *str != END; str++)
     {
+        if((unsigned char)*str >= ALPHSIZE) continue;
         if(n >= 0)
         {
             if(multi[n]->next[*str] != 0) 
@@ -227,7 +237,7 @@ char process_tags()
 {
     static const char *doctag = "<doc ";
     const char *tag = doctag;
-    char *cur = line;
+    char *cur = (char*)line.c_str();
 
     for(; *tag; tag++)
     {
@@ -249,15 +259,11 @@ char process_tags()
         }
     }
 
-    if(quos != 3)
-    {
-        
-        return 0;
-    }
+    if(quos != 3) return 0;
 
     quos = 0;
 
-    cur = line + linelen - 1;
+    cur = (char*)line.c_str() + line.size() - 1;
 
     for(; *cur; cur--)
     if(*cur == '"')
@@ -281,18 +287,19 @@ void process_line()
 {
     if(process_tags()) return;
 
-    insert((unsigned char*)line);
+    insert((char*)line.c_str());
 }
 
 void process_file(const char *filename)
 {
     ifstream db(filename);
-    if(!db.is_open()) return;
-    string str;
-    while(getline(db, str))
+    if(!db.is_open())
     {
-        linelen = str.size();
-        strcpy(line, str.c_str());
+        printf("Couldn't open %s\n", filename);
+        return;
+    }
+    while(getline(db, line))
+    {
         process_line();
     }
     db.close();
@@ -325,6 +332,8 @@ int main()
 
     printf("Pre-processing time: %f\n", t_prep);
 
+    printf("%d articles\n", id);
+
     ifstream ifs("titles/titles_data", std::ios::binary);
     if(!ifs.is_open()) return 1;
     ifs.seekg (0, ifs.end);
@@ -347,7 +356,7 @@ int main()
 
     while(1)
     {
-        unsigned char word[32];
+        char word[32];
         printf("\033[0;34m"); 
         printf("Search >> ");
         printf("\033[1;34m"); 

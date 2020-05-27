@@ -42,44 +42,42 @@ struct BASICNODE
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
 
+
 void make(int *n)
 {
     if(*n != 0) return;
-
     BASICNODE *bn = new BASICNODE;
     *n = -basic.size()-1;
     basic.push_back(bn);
 }
 
-void insert(unsigned char *str, int list)
+void insert(char *w, int list)
 {
     {
-        unsigned char *t;
-        for(t = str; *t; t++) *t -= '0';
+        char *t;
+        for(t = w; *t && *t != ' '; t++) *t -= '0';
         *t = ALPHSIZE;
     }
-    
-    if(*str >= ALPHSIZE) return; 
 
-    int *n = &multi[0]->next[*str];
-    str++;
+    if(*w >= ALPHSIZE) return;
 
+    int *n = &multi[0]->next[*w];
     make(n);
 
-    for(; *str < ALPHSIZE; str++)
+    for(w++; *w < ALPHSIZE; w++)
     {
-        if(*n > 0) 
+        if(*n > 0)
         {
-            n = &multi[*n]->next[*str];
+            n = &multi[*n]->next[*w];
             make(n);
         }
         else if(*n < 0)
         {
             int b = -(*n)-1;
             char c = basic[b]->c;
-            if(c == *str || c == -1)
+            if(c == -1 || c == *w)
             {
-                basic[b]->c = *str;
+                basic[b]->c = *w;
                 n = &basic[b]->next;
                 make(n);
             }
@@ -89,13 +87,11 @@ void insert(unsigned char *str, int list)
                 int k = multi.size();
                 multi.push_back(mn);
 
-                int nc = mn->next[c];
                 mn->next[c] = basic[b]->next;
-                if(nc > 0) multi[nc]->list = basic[b]->list;
-                else if(nc < 0) basic[-nc-1]->list = basic[b]->list;
-                
+                mn->list = basic[b]->list;
+
                 *n = k;
-                n = &mn->next[*str];
+                n = &mn->next[*w];
                 *n = -b-1;
                 basic[b]->c = -1;
                 basic[b]->list = -1;
@@ -104,38 +100,38 @@ void insert(unsigned char *str, int list)
         }
     }
 
-    if(*n == 0) return;
     if(*n > 0) multi[*n]->list = list;
     else basic[-(*n)-1]->list = list;
+
 }
 
-int find(unsigned char *str)
+int find(char *w)
 {
     {
-        unsigned char *t;
-        for(t = str; *t; t++) *t -= '0';
+        char *t;
+        for(t = w; *t && *t != ' '; t++) *t -= '0';
         *t = ALPHSIZE;
     }
 
     int n = 0, list = -1;
-    for(; *str < ALPHSIZE; str++)
+    for(; *w < ALPHSIZE; w++)
     {
         if(n >= 0)
         {
-            if(multi[n]->next[*str] != 0) 
+            if(multi[n]->next[*w] != 0) 
             {
-                n = multi[n]->next[*str];
+                n = multi[n]->next[*w];
                 if(n >= 0) list = multi[n]->list;
                 else list = basic[-n-1]->list;
             }
-            else return -2;
+            else return -1;
         }
         else
         {
             int b = -n-1;
             char c = basic[b]->c;
-            if(c != *str) return -1;
-            n = basic[b]->next; if(n == 0) return -4;
+            if(c != *w) return -1;
+            n = basic[b]->next;
             if(n >= 0) list = multi[n]->list;
             else list = basic[-n-1]->list;
         }
@@ -144,12 +140,11 @@ int find(unsigned char *str)
 }
 
 
-
 int main()
 {
 
     multi.push_back(new MULTINODE);
-    static unsigned char str[32];
+    static char str[32];
 
     int list = 0;
     while(1)
