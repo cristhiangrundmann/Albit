@@ -163,7 +163,7 @@ int main() {
     // Armazena todos os títulos em um vetor de strings
 	for (int i = 0; i < 164; i++) {
         
-        file_name = "database/db";
+        file_name = "database2/db";
         file_name += to_string(i);
         cout << file_name << endl;
 
@@ -178,16 +178,9 @@ int main() {
                     int pos = db.tellg();
 
                     Title title(get_title(line));
-                    Print_UTF8(title.c_str());
-                    printf("\n");
 
                     title.data.database = i;
                     title.data.database_offset = pos;
-                    
-                    if (title.find("\"") != string::npos) {
-
-                        cout << title << title.data.database << endl;
-                    }
 
                     title_list.push_back(title);
 
@@ -208,7 +201,7 @@ int main() {
     ofstream titles(file_name);
     for (Title& title : title_list) {
         title.data.offset = titles.tellp();
-        titles << title << '\0';
+        titles << title << '\n';
     }
     titles.close();
 
