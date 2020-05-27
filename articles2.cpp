@@ -13,7 +13,9 @@ using std::ifstream;
 
 #define BUFFERSIZE 0x10000
 
-string line;
+char line[BUFFERSIZE];
+size_t linelen;
+
 
 enum {
     C_0, C_1, C_2, C_3,
@@ -237,7 +239,7 @@ char process_tags()
 {
     static const char *doctag = "<doc ";
     const char *tag = doctag;
-    char *cur = (char*)line.c_str();
+    char *cur = line;
 
     for(; *tag; tag++)
     {
@@ -263,7 +265,7 @@ char process_tags()
 
     quos = 0;
 
-    cur = (char*)line.c_str() + line.size() - 1;
+    cur = line + linelen - 1;
 
     for(; *cur; cur--)
     if(*cur == '"')
@@ -287,7 +289,7 @@ void process_line()
 {
     if(process_tags()) return;
 
-    insert((char*)line.c_str());
+    insert(line);
 }
 
 void process_file(const char *filename)
@@ -298,8 +300,11 @@ void process_file(const char *filename)
         printf("Couldn't open %s\n", filename);
         return;
     }
-    while(getline(db, line))
+    string str;
+    while(getline(db, str))
     {
+        linelen = str.size();
+        strcpy(line, str.c_str());
         process_line();
     }
     db.close();
