@@ -16,7 +16,6 @@ using std::ifstream;
 char line[BUFFERSIZE];
 size_t linelen;
 
-
 enum {
     C_0, C_1, C_2, C_3,
     C_4, C_5, C_6, C_7,
@@ -29,13 +28,13 @@ enum {
     C_T, C_U, C_V, C_W,
     C_X, C_Y, C_Z,
 
-    NON, END
+    NON, SKP, END
 };
 
 int ISO_8859[256] = {
+    END, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
     NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
+    NON, NON, NON, NON, NON, NON, NON, SKP, NON, NON, NON, NON, NON, NON, NON, NON,
     C_0, C_1, C_2, C_3, C_4, C_5, C_6, C_7, C_8, C_9, NON, NON, NON, NON, NON, NON,
     C_A, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
     C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
@@ -84,8 +83,6 @@ vector<vector<int>> lists;
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
 
-
-char *title;
 int id = -1;
 
 void make(int *n)
@@ -97,31 +94,7 @@ void make(int *n)
     basic.push_back(bn);
 }
 
-void insert_iso(char*);
-
-void insert(char *str)
-{
-    char *t = str;
-
-    for(; *t; t++)
-    {
-        if(*t == ' ')
-        {
-            *t = END;
-            insert_iso(str);
-            return;
-        }
-        *t = ISO_8859[(unsigned char)*t];
-        if((unsigned char)*t >= ALPHSIZE)
-        {
-            *t = END;
-            insert_iso(str);
-            str = t+1;
-        }
-    }
-}
-
-void insert_iso(char *str)
+void insert(char *str) //ALPHABET
 {    
     if(*str == END) return;
 
@@ -132,6 +105,7 @@ void insert_iso(char *str)
 
     for(; *str != END; str++)
     {
+        if(*str == SKP) continue;
         if(*n > 0) 
         {
             n = &multi[*n]->next[*str];
@@ -183,7 +157,7 @@ void insert_iso(char *str)
     lists[*llist].push_back(id);
 }
 
-int find(char *str)
+int find(char *str) //ASCII
 {
     {
         char *t;
@@ -233,63 +207,27 @@ float stop()
     (t_end.tv_nsec - t_start.tv_nsec)) / 1000000000.f;
 }
 
-
-
-char process_tags()
-{
-    static const char *doctag = "<doc ";
-    const char *tag = doctag;
-    char *cur = line;
-
-    for(; *tag; tag++)
-    {
-        if(*tag != *cur) return 0;
-        cur++;
-    }
-
-    int quos = 0;
-    
-
-    for(; *cur; cur++)
-    if(*cur == '"') 
-    {
-        quos++;
-        if(quos == 3) 
-        {
-            title = cur+1;
-            break;
-        }
-    }
-
-    if(quos != 3) return 0;
-
-    quos = 0;
-
-    cur = line + linelen - 1;
-
-    for(; *cur; cur--)
-    if(*cur == '"')
-    {
-        quos++;
-
-        if(quos == 7)
-        {
-            *cur = 0;
-            break;
-        }
-    }
-
-    if(quos != 7) return 0;
-
-    id++;
-    return 1;
-}
-
 void process_line()
 {
-    if(process_tags()) return;
+    if(linelen >= 4)
+    if( *(uint32_t*)line == 0x636f6423 )
+    {
+        id++;
+        return;
+    }
 
-    insert(line);
+    char *str = line;
+    for(char *cur = str; cur < line+linelen; cur++)
+    {
+        *cur = ISO_8859[(unsigned char)*cur];
+        if(*cur == NON)
+        {
+            *cur = END;
+            insert(str);
+            str = cur+1;
+            continue;
+        }
+    }
 }
 
 void process_file(const char *filename)
@@ -327,6 +265,7 @@ void Print_UTF8(const char* word) {
     const byte* array = (const byte*)word;
 
     for(; *array != 0; array++) {
+        if(*array == 0x0a) return;
 
         if (*array > 0x7F) {
             // C2
@@ -390,7 +329,7 @@ int main()
         printf("Processing database 'db%d'... (%ld BASICNODES\t%ld MULTINODES)\n", i, 
         basic.size(), multi.size());
         char filename[24];
-        sprintf(filename, "./database/db%d", i);
+        sprintf(filename, "./database3/db%d", i);
         process_file(filename);
     }
 
