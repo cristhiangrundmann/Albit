@@ -214,6 +214,37 @@ struct CTrie {
     }
     // nodes[node].next[*data] will be empty
 
+    byte proximo_vazio(const byte** word, int* node) {
+
+        const byte* slice = *word;
+
+        for (; **word != END; (*word)++) {
+            
+            byte d = **word;
+
+            if (nodes[*node].next[d] == EMPTY) {
+                
+                *word = slice;
+                return d;
+            }
+            
+            if (*node != nodes[*node].next[**word])
+                slice = *word;
+            
+            *node = nodes[*node].next[**word];
+
+        }
+
+        *word = slice;
+
+        if(nodes[*node].next[END] != EMPTY)
+            return NON;
+
+        return END;        
+
+    }
+    // nodes[*node].next[ret] will be empty if ret != NON
+
     // Arrebenta next[id] de node
     size_t arrebenta(byte id, int node) {
 
@@ -230,8 +261,63 @@ struct CTrie {
 
     }
 
+    int insert(const byte* word, const byte* word_slice, int node) {
+
+        const byte* word_slice1 = word_slice;
+        int node1 = node;
+        byte ret = proximo_vazio(&word_slice1, &node1);
+
+        // Se achou um nó vazio
+        if (ret != NON) {
+
+            // Se for um END pode por a palavra aqui
+            if (ret == END) {
+                return node1;
+            }
+            // Se o vazio está em uma letra
+            else {
+
+                const byte* word_slice2 = word_slice1;
+                int node2 = node1;
+                
+                while (1) {
+
+                    // Faz um loop lá
+                    nodes[node2].next[ret] = node2;
+                    
+                    byte ret_bkp = ret;
+                    ret = proximo_vazio(&word_slice2, &node2);
+                    
+                    // Se não tem nó vazio, desiste do loop
+                    if (ret == NON) {
+                        int position = nodes.size();
+                        nodes[node2].next[ret_bkp] = position;
+                        nodes.push_back(Node());
+                        return position;
+                    }
+
+                    // Se acabou a lista
+                    if (ret == END) {
+                        return node2;
+                    }
+
+                }
+
+            }
+            
+
+
+        } else {
+
+            return -1;
+
+        }
+        
+
+    }
+
     // Adapta a trie e retorna o nó em que a palavra pode ser inserida
-    int insert(const byte* data, int node) {
+    /*int insert(const byte* data, int node) {
 
         const byte* empty_data = data;
         int empty_node = node;
@@ -346,9 +432,7 @@ struct CTrie {
 
         // Can't reach here
         return -1;
-    }
-
-    int max_words = 100;
+    }*/
 
     void add_word(const char* word, char end = '\0') {
 
@@ -356,12 +440,9 @@ struct CTrie {
         entry.original_word = Convert_ISO(word, end);
         if (entry.original_word.size() <= 1)
             return;
-        /*if (max_words <= 0)
-            return;*/
-        
-        max_words--;
-        
-        int node = insert( entry.original_word.data(), 0 );
+
+        const byte* data = entry.original_word.data();
+        int node = insert( data, data, 0 );
         if (node == -1) {
             //cout << word << " not inserted" << endl;
         } else {
@@ -380,7 +461,8 @@ struct CTrie {
 
 };
 
-/*char Words[][32] = {
+char Words[][32] = {
+    "a",
     "abacate",
     "abacaxi",
     "aba",//
@@ -399,16 +481,16 @@ struct CTrie {
     "pancada",
     "porto",
     "queijo"
-};*/
+};
 
-char Words[][32] = {
+/*char Words[][32] = {
     "a",
     "ab",
     "abb",
     "ac",
     "so",
     "ao",
-};
+};*/
 
 void wait_input(CTrie& trie) {
     

@@ -108,7 +108,7 @@ int main() {
     // Armazena todos os títulos em um vetor de strings
 	for (int i = 0; i < 164; i++) {
         
-        file_name = "database2/db";
+        file_name = "database3/db";
         file_name += to_string(i);
         cout << file_name << endl;
 
@@ -117,12 +117,13 @@ int main() {
         if (db.is_open()) {
             
             while (getline(db, line)) {
-            
-                if (line.compare(0, 5, "<doc ") == 0) {
+
+                if (line.compare(0, 4, "#doc") == 0) {
                     
                     int pos = db.tellg();
 
-                    Title title(get_title(line));
+                    //Title title(get_title(line));
+                    Title title(line.substr( 5 , string::npos));
 
                     title.data.database = i;
                     title.data.database_offset = pos;
@@ -160,14 +161,14 @@ int main() {
     ids.close();
     
     // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
-    cout << "Saving offsets csv" << endl;
+    /*cout << "Saving offsets csv" << endl;
     file_name = "titles/titles_data.csv";
     ofstream ids_csv(file_name);
     ids_csv << "\"offset\", \"database\", \"database offset\"\n";
     for (Title& title : title_list) {
         ids_csv << title.data.offset << "," << title.data.database << "," << title.data.database_offset << endl;
     }
-    ids_csv.close();
+    ids_csv.close();*/
 
     return 0;
 
