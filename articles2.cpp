@@ -1,84 +1,9 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <algorithm>
-
-using std::vector;
-using std::string;
-using std::ifstream;
+#include "albit.h"
 
 #define BUFFERSIZE 0x10000
 
 char line[BUFFERSIZE];
 size_t linelen;
-
-enum {
-    C_0, C_1, C_2, C_3,
-    C_4, C_5, C_6, C_7,
-    C_8, C_9,
-    
-    C_A, C_B, C_C, C_D, C_E,
-    C_F, C_G, C_H, C_I, C_J,
-    C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S,
-    C_T, C_U, C_V, C_W,
-    C_X, C_Y, C_Z,
-
-    NON, SKP, END
-};
-
-int ISO_8859[256] = {
-    END, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, SKP, NON, NON, NON, NON, NON, NON, NON, NON,
-    C_0, C_1, C_2, C_3, C_4, C_5, C_6, C_7, C_8, C_9, NON, NON, NON, NON, NON, NON,
-    C_A, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
-    NON, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, C_C, C_L, C_C, C_Y, C_S, NON, C_S, C_C, C_A, NON, NON, NON, C_R, NON,
-    C_O, NON, C_2, C_3, C_Z, C_U, NON, NON, C_Z, C_1, C_O, NON, C_O, C_O, C_Y, NON,
-    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
-    C_D, C_N, C_O, C_O, C_O, C_O, C_O, C_X, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_S,
-    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
-    C_D, C_N, C_O, C_O, C_O, C_O, C_O, NON, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_Y
-};
-
-
-#define ALPHSIZE 36
-
-struct MULTINODE
-{
-    int list;
-    int next[ALPHSIZE];
-
-    MULTINODE()
-    {
-        list = -1;
-        for(int i = 0; i < ALPHSIZE; i++) next[i] = 0;
-    }
-};
-
-struct BASICNODE
-{
-    int list;
-    int next;
-    char c;
-
-    BASICNODE()
-    {
-        list = -1;
-        next = 0;
-        c = -1;
-    }
-};
 
 struct LIST
 {
@@ -196,19 +121,6 @@ void calc_freq()
     words.clear();
 }
 
-struct timespec t_start, t_end;
-void start()
-{
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t_start);   
-}
-
-float stop()
-{
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t_end);
-    return ((t_end.tv_sec - t_start.tv_sec) * 1000000000 + 
-    (t_end.tv_nsec - t_start.tv_nsec)) / 1000000000.f;
-}
-
 void process_line()
 {
     char *str = line;
@@ -273,15 +185,14 @@ int main()
 
     float t_prep = stop();
 
-    printf("Pre-processing time: %f\n", t_prep);
-
-    printf("%d articles\n", id);
-
     //SORT BY WEIGHT
     for(int i = 0; i < lists.size(); i++)
     {
         sort(lists[i].begin(), lists[i].end(), LIST_COMPARE);
     }
+
+    printf("Pre-processing time: %f\n", t_prep);
+    printf("%d articles\n", id);
 
     //SAVE TRIE
     FILE *ftrie = fopen("trie/trie_multi", "wb");
