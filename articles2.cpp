@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 using std::vector;
 using std::string;
@@ -79,11 +80,23 @@ struct BASICNODE
     }
 };
 
-vector<vector<int>> lists;
+struct LIST
+{
+    int id;
+    int weight;
+};
+
+bool LIST_COMPARE(LIST a, LIST b)
+{
+    return a.weight > b.weight;
+}
+
+vector<vector<LIST>> lists;
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
 
 int id = -1;
+int weight;
 
 void make(int *n)
 {
@@ -148,13 +161,20 @@ void insert(char *str) //ALPHABET
     if(*llist == -1)
     {
         *llist = lists.size();
-        vector<int> list;
+        vector<LIST> list;
         lists.push_back(list);
     }
 
-    if(lists[*llist].size() > 0) if(lists[*llist].back() == id) return;
+    if(lists[*llist].size() > 0) if(lists[*llist].back().id == id) 
+    {
+        return;
+        lists[*llist].back().weight += weight;
+    }
 
-    lists[*llist].push_back(id);
+    LIST ll;
+    ll.id = id;
+    ll.weight = weight;
+    lists[*llist].push_back(ll);
 }
 
 struct timespec t_start, t_end;
@@ -179,7 +199,9 @@ void process_line()
     {
         id++;
         str += 5;
+        weight = 5;
     }
+    else weight = 1;
 
     
     for(char *cur = str; cur < line+linelen; cur++)
@@ -233,6 +255,12 @@ int main()
     printf("Pre-processing time: %f\n", t_prep);
 
     printf("%d articles\n", id);
+
+    //SORT BY WEIGHT
+    for(int i = 0; i < lists.size(); i++)
+    {
+        sort(lists[i].begin(), lists[i].end(), LIST_COMPARE);
+    }
 
     //SAVE TRIE
     FILE *ftrie = fopen("trie/trie_multi", "wb");
