@@ -83,7 +83,13 @@ struct BASICNODE
 struct LIST
 {
     int id;
-    int weight;
+    float weight;
+};
+
+struct VVLIST
+{
+    int list;
+    int art;
 };
 
 bool LIST_COMPARE(LIST a, LIST b)
@@ -94,6 +100,7 @@ bool LIST_COMPARE(LIST a, LIST b)
 vector<vector<LIST>> lists;
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
+vector<VVLIST> words;
 
 int id = -1;
 int weight;
@@ -167,14 +174,26 @@ void insert(char *str) //ALPHABET
 
     if(lists[*llist].size() > 0) if(lists[*llist].back().id == id) 
     {
-        return;
         lists[*llist].back().weight += weight;
+        return;
     }
+
+    VVLIST vv;
+    vv.list = *llist;
+    vv.art = lists[*llist].size();
+    words.push_back(vv);
 
     LIST ll;
     ll.id = id;
     ll.weight = weight;
     lists[*llist].push_back(ll);
+}
+
+void calc_freq()
+{
+    if(words.size() == 0) return;
+    for(int i = 0; i < words.size(); i++) lists[words[i].list][words[i].art].weight /= words.size();
+    words.clear();
 }
 
 struct timespec t_start, t_end;
@@ -197,6 +216,7 @@ void process_line()
     if(linelen >= 4)
     if( *(uint32_t*)line == 0x636f6423 )
     {
+        calc_freq();
         id++;
         str += 5;
         weight = 5;
@@ -249,6 +269,7 @@ int main()
         sprintf(filename, "./database3/db%d", i);
         process_file(filename);
     }
+    calc_freq();
 
     float t_prep = stop();
 
