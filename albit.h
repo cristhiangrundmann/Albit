@@ -12,9 +12,11 @@
 #include <ctime>
 #include <algorithm>
 
-
-
 using namespace std;
+
+typedef uint8_t byte;
+
+#define PACKED __attribute__((packed))
 
 enum {
     C_0, C_1, C_2, C_3,
@@ -31,7 +33,7 @@ enum {
     NON, SKP, END
 };
 
-int ISO_8859[256] = {
+const byte ISO_8859[256] = {
     END, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
     NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
     NON, NON, NON, NON, NON, NON, NON, SKP, NON, NON, NON, NON, NON, NON, NON, NON,
@@ -50,8 +52,22 @@ int ISO_8859[256] = {
     C_D, C_N, C_O, C_O, C_O, C_O, C_O, NON, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_Y
 };
 
-
 #define ALPHSIZE 36
+
+vector<byte> Convert_ISO(const char* word, char end = '\0') {
+
+    vector<byte> word_converted;
+
+    for (const byte* c = (byte*)word; *c != end; c++) {
+        byte id = ISO_8859[*c];
+        if (id != NON)
+            word_converted.push_back(id);
+    }
+
+    word_converted.push_back(END);
+    return word_converted;
+
+}
 
 struct MULTINODE
 {
@@ -63,7 +79,7 @@ struct MULTINODE
         list = -1;
         for(int i = 0; i < ALPHSIZE; i++) next[i] = 0;
     }
-};
+} PACKED;
 
 struct BASICNODE
 {
@@ -77,7 +93,7 @@ struct BASICNODE
         next = 0;
         c = -1;
     }
-};
+} PACKED;
 
 
 
@@ -104,12 +120,6 @@ void* Load_on_RAM(string filename) {
     return nullptr;
 }
 
-// Title class #################################
-
-
-#define PACKED __attribute__((packed))
-
-typedef uint8_t byte;
 
 struct Title_Data {
 
