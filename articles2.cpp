@@ -157,43 +157,6 @@ void insert(char *str) //ALPHABET
     lists[*llist].push_back(id);
 }
 
-int find(char *str) //ASCII
-{
-    {
-        char *t;
-        for(t = str; *t && *t != ' '; t++) *t = ISO_8859[(unsigned char)*t];
-        *t = END;
-    }
-
-    int n = 0, list = -1;
-    for(; *str != END; str++)
-    {
-        if((unsigned char)*str >= ALPHSIZE) continue;
-        if(n >= 0)
-        {
-            if(multi[n]->next[*str] != 0) 
-            {
-                n = multi[n]->next[*str];
-                if(n >= 0) list = multi[n]->list;
-                else list = basic[-n-1]->list;
-            }
-            else return -1;
-        }
-        else
-        {
-            int b = -n-1;
-            char c = basic[b]->c;
-            if(c != *str) return -1;
-            n = basic[b]->next;
-            if(n >= 0) list = multi[n]->list;
-            else list = basic[-n-1]->list;
-        }
-    }
-    return list;
-}
-
-
-
 struct timespec t_start, t_end;
 void start()
 {
@@ -248,76 +211,6 @@ void process_file(const char *filename)
     db.close();
 }
 
-struct Title_Data {
-
-    uint32_t offset, database, database_offset;
-
-} *titles_data;
-
-char *titles_names;
-
-typedef uint8_t byte;
-
-const byte error[] = {0xF0, 0x9F, 0x96, 0x95, 0xEF, 0xB8, 0x8F, 0x00};
-
-void Print_UTF8(const char* word) {
-
-    const byte* array = (const byte*)word;
-
-    for(; *array != 0; array++) {
-        if(*array == 0x0a) return;
-
-        if (*array > 0x7F) {
-            // C2
-            if (*array >= 0xA0 && *array < 0xC0) {
-                switch(*array) {
-                    case(0xA0):
-                        printf(" ");
-                        continue;
-                    case(0xA4):
-                        printf("%c%c%c", 0xE2, 0x82, 0xAC);
-                        continue;
-                    case(0xA6):
-                        printf("%c%c", 0xC5, 0xA0);
-                        continue;
-                    case(0xA8):
-                        printf("%c%c", 0xC5, 0xA1);
-                        continue;
-                    case(0xB4):
-                        printf("%c%c", 0xC5, 0xBD);
-                        continue;
-                    case(0xB8):
-                        printf("%c%c", 0xC5, 0xBE);
-                        continue;
-                    case(0xBC):
-                        printf("%c%c", 0xC5, 0x92);
-                        continue;
-                    case(0xBD):
-                        printf("%c%c", 0xC5, 0x93);
-                        continue;
-                    case(0xBE):
-                        printf("%c%c", 0xC5, 0xB8);
-                        continue;
-                    default:
-                        printf("%c%c", 0xC2, *array);
-                        continue;
-                }
-            }
-            //C3
-            if (*array >= 0xC0 && *array <= 0xFF) {
-                printf("%c%c", 0xC3, (*array) - 0x40);
-                continue;
-            }
-            //ERROR
-            printf("%s", error);
-            continue;
-        }
-
-        printf("%c", *array);
-    }
-}
-
-
 int main()
 {
     multi.push_back(new MULTINODE);
@@ -339,70 +232,39 @@ int main()
 
     printf("%d articles\n", id);
 
-    ifstream ifs("titles/titles_data", std::ios::binary);
-    if(!ifs.is_open()) return 1;
-    ifs.seekg (0, ifs.end);
-    long size = ifs.tellg();
-    ifs.seekg(0);
-    titles_data = (Title_Data*)(new char[size]);
-    if(!titles_data) return 2;
-    ifs.read((char*)titles_data, size);
-    ifs.close();
-
-    ifs.open("titles/titles_names", std::ios::binary);
-    if(!ifs.is_open()) return 1;
-    ifs.seekg (0, ifs.end);
-    size = ifs.tellg();
-    ifs.seekg(0);
-    titles_names = new char[size];
-    if(!titles_names) return 2;
-    ifs.read(titles_names, size);
-    ifs.close();
-
-    while(1)
+    //SAVE TRIE
+    FILE *ftrie = fopen("trie/trie_multi", "wb");
+    for(int i = 0; i < multi.size(); i++)
     {
-        char word[32];
-        printf("\033[0;34m"); 
-        printf("Search >> ");
-        printf("\033[1;34m"); 
-        std::cin >> word;
-        start();
+        fwrite(multi[i], sizeof(MULTINODE), 1, ftrie);
+    }
+    fclose(ftrie);
 
-        int n = 0;
+    ftrie = fopen("trie/trie_basic", "wb");
+    for(int i = 0; i < basic.size(); i++)
+    {
+        fwrite(basic[i], sizeof(BASICNODE), 1, ftrie);
+    }
+    fclose(ftrie);
 
-        int list = find(word);
-        
-        float t_search = stop();
-        
-        if(list != -1)
-        {
-            int page = 20;
-            printf("\033[1;32m"); 
-            printf("Found %ld results (%f seconds)\n", lists[list].size(), t_search);
-            for(int i = 0; i < lists[list].size(); i++)
-            {
-                int __ID__ = lists[list][i];
-                printf("\033[0;32m");
-                printf("Result %d: \033[0m", i+1);
-                Print_UTF8(&titles_names[titles_data[__ID__].offset]);
-                printf("\n");
-                page--;
-                if(page == 0)
-                {
-                    ASK_AGAIN:
-                    printf("\033[0;33m"); 
-                    printf("Do you want more results? (Y/N)\033[0m\n");
-                    char yn;
-                    std::cin >> yn;
-                    int i = ISO_8859[(unsigned char)yn];
-                    if(i == C_Y) page = 20;
-                    else if(i == C_N) break;
-                    else goto ASK_AGAIN;
-                }
-            }
-        }
-        else printf("\033[0;31mNo matches\n");
+    //SAVE LISTS
+    FILE *flist = fopen("trie/lists", "wb");
+
+    int offset = lists.size() * 2;
+    for(int i = 0; i < lists.size(); i++)
+    {
+        int s = lists[i].size();
+        fwrite(&s, 4, 1, flist);
+        fwrite(&offset, 4, 1, flist);
+        offset += s;
     }
 
+    for(int i = 0; i < lists.size(); i++)
+    for(int j = 0; j < lists[i].size(); j++)
+    {
+        fwrite(&(lists[i])[j], 4, 1, flist);
+    }
+
+    fclose(flist);
     return 0;
 }
