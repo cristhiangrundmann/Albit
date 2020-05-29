@@ -1,89 +1,20 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <algorithm>
-
-using std::vector;
-using std::string;
-using std::ifstream;
+#include "albit.h"
 
 #define BUFFERSIZE 0x10000
 
 char line[BUFFERSIZE];
 size_t linelen;
 
-enum {
-    C_0, C_1, C_2, C_3,
-    C_4, C_5, C_6, C_7,
-    C_8, C_9,
-    
-    C_A, C_B, C_C, C_D, C_E,
-    C_F, C_G, C_H, C_I, C_J,
-    C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S,
-    C_T, C_U, C_V, C_W,
-    C_X, C_Y, C_Z,
-
-    NON, SKP, END
-};
-
-int ISO_8859[256] = {
-    END, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, SKP, NON, NON, NON, NON, NON, NON, NON, NON,
-    C_0, C_1, C_2, C_3, C_4, C_5, C_6, C_7, C_8, C_9, NON, NON, NON, NON, NON, NON,
-    C_A, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
-    NON, C_A, C_B, C_C, C_D, C_E, C_F, C_G, C_H, C_I, C_J, C_K, C_L, C_M, C_N, C_O,
-    C_P, C_Q, C_R, C_S, C_T, C_U, C_V, C_W, C_X, C_Y, C_Z, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON, NON,
-    NON, NON, C_C, C_L, C_C, C_Y, C_S, NON, C_S, C_C, C_A, NON, NON, NON, C_R, NON,
-    C_O, NON, C_2, C_3, C_Z, C_U, NON, NON, C_Z, C_1, C_O, NON, C_O, C_O, C_Y, NON,
-    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
-    C_D, C_N, C_O, C_O, C_O, C_O, C_O, C_X, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_S,
-    C_A, C_A, C_A, C_A, C_A, C_A, C_A, C_C, C_E, C_E, C_E, C_E, C_I, C_I, C_I, C_I,
-    C_D, C_N, C_O, C_O, C_O, C_O, C_O, NON, C_O, C_U, C_U, C_U, C_U, C_Y, C_P, C_Y
-};
-
-
-#define ALPHSIZE 36
-
-struct MULTINODE
-{
-    int list;
-    int next[ALPHSIZE];
-
-    MULTINODE()
-    {
-        list = -1;
-        for(int i = 0; i < ALPHSIZE; i++) next[i] = 0;
-    }
-};
-
-struct BASICNODE
-{
-    int list;
-    int next;
-    char c;
-
-    BASICNODE()
-    {
-        list = -1;
-        next = 0;
-        c = -1;
-    }
-};
-
 struct LIST
 {
     int id;
-    int weight;
+    float weight;
+};
+
+struct VVLIST
+{
+    int list;
+    int art;
 };
 
 bool LIST_COMPARE(LIST a, LIST b)
@@ -94,6 +25,7 @@ bool LIST_COMPARE(LIST a, LIST b)
 vector<vector<LIST>> lists;
 vector<MULTINODE*> multi;
 vector<BASICNODE*> basic;
+vector<VVLIST> words;
 
 int id = -1;
 int weight;
@@ -167,9 +99,14 @@ void insert(char *str) //ALPHABET
 
     if(lists[*llist].size() > 0) if(lists[*llist].back().id == id) 
     {
-        return;
         lists[*llist].back().weight += weight;
+        return;
     }
+
+    VVLIST vv;
+    vv.list = *llist;
+    vv.art = lists[*llist].size();
+    words.push_back(vv);
 
     LIST ll;
     ll.id = id;
@@ -177,17 +114,11 @@ void insert(char *str) //ALPHABET
     lists[*llist].push_back(ll);
 }
 
-struct timespec t_start, t_end;
-void start()
+void calc_freq()
 {
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t_start);   
-}
-
-float stop()
-{
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t_end);
-    return ((t_end.tv_sec - t_start.tv_sec) * 1000000000 + 
-    (t_end.tv_nsec - t_start.tv_nsec)) / 1000000000.f;
+    if(words.size() == 0) return;
+    for(int i = 0; i < words.size(); i++) lists[words[i].list][words[i].art].weight /= words.size();
+    words.clear();
 }
 
 void process_line()
@@ -197,6 +128,7 @@ void process_line()
     if(linelen >= 4)
     if( *(uint32_t*)line == 0x636f6423 )
     {
+        calc_freq();
         id++;
         str += 5;
         weight = 5;
@@ -249,18 +181,18 @@ int main()
         sprintf(filename, "./database3/db%d", i);
         process_file(filename);
     }
+    calc_freq();
 
     float t_prep = stop();
-
-    printf("Pre-processing time: %f\n", t_prep);
-
-    printf("%d articles\n", id);
 
     //SORT BY WEIGHT
     for(int i = 0; i < lists.size(); i++)
     {
         sort(lists[i].begin(), lists[i].end(), LIST_COMPARE);
     }
+
+    printf("Pre-processing time: %f\n", t_prep);
+    printf("%d articles\n", id);
 
     //SAVE TRIE
     FILE *ftrie = fopen("trie/trie_multi", "wb");

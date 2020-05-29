@@ -4,80 +4,7 @@
 // - titles_names -> os títulos em ordem
 // - titles_data  -> a posição do título nesse arquivo e nos db
 
-#include <cstdio>
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cstdint>
-
-#define PACKED __attribute__((packed))
-
-using namespace std;
-
-typedef uint8_t byte;
-
-// GET TITLE ###################################
-size_t find_nth(string& str, char pat, int n) {
-
-    int begin, end, delta;
-    
-    if (n == 0)
-        return -1;
-
-    if (n < 0) {
-
-        begin = str.size() - 1;
-        end = 0;
-        delta = -1;
-        n = -n;
-
-    } else {
-
-        begin = 0;
-        end = str.size();
-        delta = 1;
-
-    }
-
-    const char* str_c = str.c_str();
-
-    int count = 0;
-
-    for (int pos = begin; pos != end; pos += delta) {
-
-        if (str_c[pos] == pat)
-            count++;
-        
-        if (count == n)
-            return pos;
-
-    }
-
-    return -2;
-
-}
-
-string get_title(string& line) {
-
-    size_t begin = find_nth(line, '"', 3);
-    size_t end = find_nth(line, '"', -7);
-
-    return line.substr(begin + 1, end - begin - 1);
-
-}
-// #############################################
-
-
-
-
-// Title class #################################
-
-struct Title_Data {
-
-    uint32_t offset, database, database_offset;
-
-} PACKED;
+#include "albit.h"
 
 // It's just a string that stores three ints
 class Title : public string {
@@ -94,8 +21,6 @@ class Title : public string {
 
 };
 // #############################################
-
-
 
 
 int main() {
@@ -159,16 +84,6 @@ int main() {
         ids.write((char*)&title.data, sizeof(Title_Data));
     }
     ids.close();
-    
-    // Salva um csv com (offset do título, database que ele está, posição no database que ele está) de cada título
-    /*cout << "Saving offsets csv" << endl;
-    file_name = "titles/titles_data.csv";
-    ofstream ids_csv(file_name);
-    ids_csv << "\"offset\", \"database\", \"database offset\"\n";
-    for (Title& title : title_list) {
-        ids_csv << title.data.offset << "," << title.data.database << "," << title.data.database_offset << endl;
-    }
-    ids_csv.close();*/
 
     return 0;
 
