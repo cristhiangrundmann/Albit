@@ -7,7 +7,7 @@ These are the major stages of the engine development
 ## Basic formatting
   - [x] Downloading the *raw* version of the corpus
   - [x] Renaming the files to `db*` from 0 to 163
-  - [x] Removing both *end of article* markers and replacing the *begin of article* to `#doc [title]` (No quotes)
+  - [x] Removing both *end of article* markers and replacing the *begin of article* to `#doc "title"` (No quotes)
   
  ## Data Structures generation
   - [x] Storing *offset* and *title* data for easier lookup
