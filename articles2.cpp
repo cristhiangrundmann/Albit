@@ -172,14 +172,16 @@ float stop()
 
 void process_line()
 {
+    char *str = line;
+
     if(linelen >= 4)
     if( *(uint32_t*)line == 0x636f6423 )
     {
         id++;
-        return;
+        str += 5;
     }
 
-    char *str = line;
+    
     for(char *cur = str; cur < line+linelen; cur++)
     {
         *cur = ISO_8859[(unsigned char)*cur];

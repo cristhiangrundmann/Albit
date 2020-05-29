@@ -200,7 +200,7 @@ void Print_UTF8(const char* word) {
 
 int main()
 {
-    
+    start();   
     FILE *ftrie = fopen("trie/trie_multi", "rb");
     fseek(ftrie, 0, SEEK_END);
     long fsize = ftell(ftrie);
@@ -245,6 +245,8 @@ int main()
     if(!titles_names) return 2;
     ifs.read(titles_names, size);
     ifs.close();
+
+    printf("Load time: %f seconds\n", stop());
 
     while(1)
     {
