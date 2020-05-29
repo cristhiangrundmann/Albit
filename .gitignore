@@ -1,5 +1,6 @@
 database/*
 database2/*
+database3/*
 titles/*
 trie/*
 
@@ -9,5 +10,6 @@ a.out
 
 !database/.keep
 !database2/.keep
+!database3/.keep
 !titles/.keep
 !trie/.keep

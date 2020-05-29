@@ -12,9 +12,9 @@
 
 #define GOTO(x, y) printf("\033[%d;%dH", y, x)
 #define CLEAN      printf("\e[1;1H\e[2J")
-#define TITLE      printf("\033[1;34m")
-#define BOTTOM     printf("\033[1;34m")
-#define WORD       printf("\033[0;35m")
+#define TITLE      printf("\033[7;36m")
+#define BOTTOM     printf("\033[7;36m")
+#define WORD       printf("\033[1;35m")
 #define RESET      printf("\033[0m")
 
 #define KEY_UP 72
@@ -183,137 +183,204 @@ void load_article(int id) {
 
 }
 
-void show_article(int id, const char* target_word) {
+bool Bin_Find(const int* data, int size, int value) {
+
+    if (size == 0)
+        return false;
+    if (size == 1)
+        return data[0] == value;
+    
+    int div = size/2;
+
+    if (data[div] == value)
+        return true;
+    if (data[div] > value)
+        return Bin_Find(data, div, value);
+    if (data[div] < value)
+        return Bin_Find(&data[div+1], size - div - 1, value);
+
+
+}
+
+vector<byte> Convert_ISO(const char* word, char end = '\0') {
+
+    vector<byte> word_converted;
+
+    for (const byte* c = (byte*)word; *c != end; c++) {
+        byte id = ISO_8859[*c];
+        if (id != NON)
+            word_converted.push_back(id);
+    }
+
+    word_converted.push_back(END);
+    return word_converted;
+
+}
+
+void show_article(int id, vector<vector<byte>> target_words) {
 
     struct winsize w;
-    vector<int> newline_stack;
-    int page_position = 0;
+    ioctl(0, TIOCGWINSZ, &w);
+    
+    vector<int> lines;
+    lines.push_back(0);
+
+    vector<int> shiny_words;
+
+    const byte* data = article.data();
+    int data_size = article.size();
+
+    int position = 0;
+    int cursor_x = 0;
+
+    while(1) {
+
+        if (position >= data_size)
+            break;
+
+        const byte* word = &data[position];
+        int word_size = 0;
+
+        vector<bool> is_word;
+        is_word.resize(target_words.size(), true);
+        int compp = 0;
+
+        for(; word_size < data_size - position; word_size++) {
+            
+            if (ISO_8859[word[word_size]] != NON) {
+
+                for (int i = 0; i < target_words.size(); i++) {
+
+                    if (ISO_8859[word[word_size]] != target_words[i][compp])
+                        is_word[i] = false;
+
+                }
+
+                compp++;
+            }
+
+            if (word[word_size] == ' ') break;
+            if (word[word_size] == '\n') break;
+        }
+
+        bool is_shiny = false;
+        
+        for (int i = 0; i < target_words.size(); i++) {
+
+            if (is_word[i] && compp == target_words[i].size() - 1)
+                is_shiny = true;
+
+        }
+
+        if (is_shiny)
+            shiny_words.push_back(position);
+
+        if (word_size == 0) {
+            if (word[0] == '\n') {
+                lines.push_back(position+1);
+                cursor_x = 0;
+            }
+            if (word[0] == ' ') {
+                cursor_x++;
+            }
+            position++;
+            continue;
+        }
+
+        // Palavra desce
+        if (word_size > w.ws_col - cursor_x) {
+
+            lines.push_back(position);
+            position += word_size;
+            cursor_x = word_size;
+            continue;
+
+        }
+
+        // Espaço ou newline vira quebra
+        if (word_size == w.ws_col - cursor_x) {
+
+            position += word_size + 1;
+            cursor_x = 0;
+            lines.push_back(position);
+            continue;
+
+        }
+
+        if (word_size < w.ws_col - cursor_x) {
+
+            position += word_size;
+            cursor_x += word_size;
+
+        }
+
+    }
+
+    int first_line = 0;
     
     while(1) {
 
-        vector<int> newlines;
-
-        ioctl(0, TIOCGWINSZ, &w);
-
         CLEAN;
-        GOTO(0,0);
+        GOTO(1,1);
 
         TITLE;
         int offset = titles_data[id].offset;
-        for(char* title = &titles_names[offset]; *title != '\n'; title++)
-            Print_UTF8(*title);
+        char* title = &titles_names[offset];
+
+        int title_size = 0;
+        for(;title[title_size] != '\n'; title_size++)
+            Print_UTF8(title[title_size]);
+        
+        for (int i = title_size; i < w.ws_col; i++)
+            printf(" ");
+        
         RESET;
 
-        const byte* data = article.data();
-        int data_size = article.size();
         
-        int array_position = page_position;
+        printf("\n");
 
-        int cursor_x = 0, cursor_y = 2;
-        GOTO(cursor_x, cursor_y);
+        if (first_line < 0)
+            first_line = 0;
+        if (first_line > lines.size() - w.ws_row)
+            first_line = lines.size() - w.ws_row;
 
-        int ended = false;
+        for (int line_i = first_line; line_i < first_line + w.ws_row - 2; line_i++) {
 
-        loop:
+            int line_begin = lines[line_i];
+            int line_end = lines[line_i + 1];
 
-            //fflush(stdout);
-            //this_thread::sleep_for(std::chrono::milliseconds(7));
+            for (int i = line_begin; i < line_end; i++) {
 
-            const byte* word;
-            int word_size = 0;
-            bool is_target_word = true;
-            int compare_position = 0;
+                // Método feio
+                if (Bin_Find(shiny_words.data(), shiny_words.size(), i)) {
+                    WORD;
+                }
 
-            if (array_position >= data_size) {
-                ended = true;
-                goto endloop;
-            }
+                if (data[i] == ' ' || data[i] == '\n') {
 
-            word = &data[array_position];
+                    RESET;
+                    if (i == line_end-1 && (data[i] == ' ' || data[i] == '\n'))
+                        break;
 
-            for (; word_size < data_size - array_position; word_size++) {
-
-                if (word[word_size] == ' ') break;
-                
-                if (ISO_8859[word[word_size]] != NON) {
-                    if (ISO_8859[word[word_size]] != ISO_8859[target_word[compare_position]])
-                        is_target_word = false;
-                    compare_position++;
                 }
                 
-            }
-
-            if (is_target_word) {
-                WORD;
-            } else {
-                RESET;
-            }
-
-            if (word_size == 0) {
                 
-                Print_UTF8(' ');
-                cursor_x++;
-                array_position++;
-                goto loop;
-
+                Print_UTF8(data[i]);
             }
 
-            if (word_size < w.ws_col - cursor_x) {
-                for (int i = 0; i < word_size; i++) {
-                    if (word[i] == '\n'){
-                        
-                        cursor_x = 0;
-                        cursor_y++;
-                        newlines.push_back(array_position);
+            printf("\n");
 
-                        if (cursor_y >= w.ws_row)
-                            goto endloop;
-                        GOTO(cursor_x, cursor_y);
-                    } else {
-                        Print_UTF8(word[i]);
-                        cursor_x++;
-                    }
-                    array_position++;
-                }
-            }
-            else {
-                cursor_x = 0;
-                cursor_y++;
-                GOTO(0,cursor_y);
-                newlines.push_back(array_position);
-
-                if (cursor_y >= w.ws_row)
-                    goto endloop;
-                
-                for (int i = 0; i < word_size; i++) {
-                    if (word[i] == '\n'){
-
-                        cursor_x = 0;
-                        cursor_y++;
-                        newlines.push_back(array_position);
-
-                        if (cursor_y >= w.ws_row)
-                            goto endloop;
-                        GOTO(cursor_x, cursor_y);
-                    } else {
-                        Print_UTF8(word[i]);
-                        cursor_x++;
-                    }
-                    array_position++;
-                }
-            }
-
-            //Print_UTF8(' ');
-            //cursor_x++;
-        
-        goto loop;
-        endloop:
+        }
 
         GOTO(0, w.ws_row);
         BOTTOM;
-        printf("U up - D down - E exit >>");
+        const char text[] = "U up - D down - E exit >> ";
 
-        getcharagain:
+        printf(text);
+        for (int i = sizeof(text) - 1; i < w.ws_col; i++)
+            printf(" ");
+        
+        GOTO(int(sizeof(text)), w.ws_row);
 
         char c = getchar();
 
@@ -321,25 +388,21 @@ void show_article(int id, const char* target_word) {
 
             case('d'):
             case('D'):
-                if (!ended) {
-                    newline_stack.push_back(page_position);
-                    page_position = newlines.front() + 1;
-                    continue;
-                }
+                first_line++;
+                continue;
             case('U'):
             case('u'):
-                if (newline_stack.size() > 0) {
-                    page_position = newline_stack.back();
-                    newline_stack.pop_back();
-                }
+                first_line--;
                 continue;
+
             case('E'):
             case('e'):
+            case('Q'):
+            case('q'):
                 return;
+
             default:
                 continue;
-                
-
 
         }
         
@@ -353,18 +416,22 @@ void show_article(int id, const char* target_word) {
 int main(int argc, char** argv) {
 
     uint32_t id;
-    const char* word;
+    vector<vector<byte>> words;
+
 
     if (argc <= 2) {
 
         id = 1232793;
-        word = "pokemon";
+        words.push_back(Convert_ISO("the"));
+        words.push_back(Convert_ISO("pokemon"));
 
     } else {
 
         // Has to converto word to byte array
         id = atoi(argv[1]);
-        word = argv[2];
+
+        for (int i = 2; i < argc; i++)
+            words.push_back(Convert_ISO(argv[i]));
 
     }
 
@@ -372,7 +439,7 @@ int main(int argc, char** argv) {
     titles_names = (char*) Load_on_RAM("titles/titles_names");
 
     load_article(id);
-    show_article(id, word);
+    show_article(id, words);
     //Print_UTF8(&titles_names[titles_data[id].offset]);
 
 }
