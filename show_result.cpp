@@ -221,7 +221,12 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
                 break;
             
             int line_begin = lines[line_i];
-            int line_end = lines[line_i + 1];
+
+            int line_end = 0;
+            if (line_i == lines.size() - 1)
+                line_end = data_size;
+            else
+                line_end = lines[line_i + 1];
 
             for (int i = line_begin; i < line_end; i++) {
 
@@ -249,8 +254,8 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
         GOTO(0, w.ws_row);
         BOTTOM;
         const char text[] = "U up - D down - Q quit";
-        const char going_down_s[] = " (going down) >> ";
-        const char going_up_s[]   = " (going up)   >> ";
+        const char going_down_s[] = " - Enter down >> ";
+        const char going_up_s[]   = " - Enter up   >> ";
         
         int s_size = sizeof(text) + sizeof(going_down_s) - 1;
         printf(text);
