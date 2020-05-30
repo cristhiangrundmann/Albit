@@ -185,6 +185,7 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
     }
 
     int first_line = 0;
+    bool going_up = false;
     
     while(1) {
 
@@ -247,13 +248,23 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
 
         GOTO(0, w.ws_row);
         BOTTOM;
-        const char text[] = "U up - D down - E exit >> ";
-
+        const char text[] = "U up - D down - Q quit";
+        const char going_down_s[] = " (going down) >> ";
+        const char going_up_s[]   = " (going up)   >> ";
+        
+        int s_size = sizeof(text) + sizeof(going_down_s) - 1;
         printf(text);
-        for (int i = sizeof(text) - 1; i < w.ws_col; i++)
+
+        if (going_up)
+            printf(going_up_s);
+        else
+            printf(going_down_s);
+        
+        
+        for (int i = s_size - 1; i < w.ws_col; i++)
             printf(" ");
         
-        GOTO(int(sizeof(text)), w.ws_row);
+        GOTO(s_size, w.ws_row);
 
         fflush(stdout);
 
@@ -263,15 +274,18 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
 
             case('d'):
             case('D'):
-                first_line++;
+                going_up = false;
                 continue;
             case('U'):
             case('u'):
-                first_line--;
+                going_up = true;
                 continue;
-
-            case('E'):
-            case('e'):
+            case(10):
+                if (going_up)
+                    first_line--;
+                else 
+                    first_line++;
+                continue;
             case('Q'):
             case('q'):
                 free(stdout_buff);
