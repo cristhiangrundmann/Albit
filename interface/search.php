@@ -10,8 +10,6 @@ if(isset($_POST['search_key']) && !empty($_POST['search_key'])){
     }
     unset($output);
     $qtd=count($results);
-    //print_r($results);
-    //echo($time);
     include 'results.html';
 }
 else{
