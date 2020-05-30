@@ -5,7 +5,7 @@ using namespace std;
 int main(int argc, char *argv[]){
     string titulos[30];
     for(int i=0;i<30; i++){
-        titulos[i]="Título do texto " + to_string(i);
+        titulos[i]="Título do texto " + to_string(i+1);
     }
     cout << 18 << endl;
     int index[30]={10,9,8,7,6,5,4,3,2,1,20,19,18,17,16,15,14,13,12,11,30,29,28,27,26,25,24,23,22,21};
