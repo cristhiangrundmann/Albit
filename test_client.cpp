@@ -56,84 +56,45 @@ int find(char *str) //ASCII
 
 
 
-int main()
+int main(int argc, char ** argv)
 {
+
+    if(argc != 2) return -1;
+    
     int *sizes = (int*)get_shared("albit.sizes", 4*5);
     if(sizes == nullptr) return -1;
-
-    printf("0\n");
 
     lists = (int*)get_shared("albit.lists", sizes[0]);
     if(lists == nullptr) return -1;
 
-    printf("1\n");
-
     basic = (BASICNODE*)get_shared("albit.trie_basic", sizes[1]);
     if(basic == nullptr) return -1;
-
-    printf("2\n");
 
     multi = (MULTINODE*)get_shared("albit.trie_multi", sizes[2]);
     if(multi == nullptr) return -1;
 
-    printf("3\n");
-
     titles_data = (Title_Data*)get_shared("albit.titles_data", sizes[3]);
     if(titles_data == nullptr) return -1;
-
-    printf("4\n");
 
     titles_names = (char*)get_shared("albit.titles_names", sizes[4]);
     if(titles_names == nullptr) return -1;
 
-    printf("5\n");
+    char *word = argv[1];
+    start();
+    int list = find(word);
+    float t_search = stop();
+    printf("%f\n", (t_search * 1000));
 
-    while(1)
+    int results = lists[list*2];
+    int start = lists[list*2+1];
+    
+    for(int i = 0; i < results; i++)
     {
-        char word[32];
-        printf("\033[0;34m"); 
-        printf("Search >> ");
-        printf("\033[1;34m"); 
-        std::cin >> word;
-        start();
-
-        int n = 0;
-
-        int list = find(word);
-        
-        float t_search = stop();
-        
-        if(list >= 0)
-        {
-            int page = 20;
-            printf("\033[1;32m");
-            int results = lists[list*2];
-            int start = lists[list*2+1];
-            printf("Found %d results (%f seconds)\n", results, t_search);
-            for(int i = 0; i < results; i++)
-            {
-                int __ID__ = lists[start+i];
-                printf("\033[0;32m");
-                printf("Result %d: \033[0m", i+1);
-                char *t = &titles_names[titles_data[__ID__].offset];
-                for(; *t != 0xa; t++) Print_UTF8(*t);
-                printf("\n");
-                page--;
-                if(page == 0)
-                {
-                    ASK_AGAIN:
-                    printf("\033[0;33m"); 
-                    printf("Do you want more results? (Y/N)\033[0m\n");
-                    char yn;
-                    std::cin >> yn;
-                    int i = ISO_8859[(unsigned char)yn];
-                    if(i == C_Y) page = 20;
-                    else if(i == C_N) break;
-                    else goto ASK_AGAIN;
-                }
-            }
-        }
-        else printf("\033[0;31mNo matches\n");
+        int __ID__ = lists[start+i];
+        char *t = &titles_names[titles_data[__ID__].offset];
+        printf("%d => ", __ID__);
+        for(; *t != 0xa; t++) Print_UTF8(*t);
+        printf("\n");
     }
 
     return 0;
