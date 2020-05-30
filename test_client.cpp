@@ -1,10 +1,23 @@
 #include "albit.h"
-#include <sys/ipc.h> 
-#include <sys/shm.h> 
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+void *get_shared(const char *name, int size)
+{
+    int fd = shm_open(name, O_RDONLY, S_IRUSR | S_IWUSR);
+    if(fd == -1) return nullptr;
+    void *data =  mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+    if(data == MAP_FAILED) return nullptr;
+    return data;
+}
 
 int *lists;
 MULTINODE *multi;
 BASICNODE *basic;
+char *titles_names;
+Title_Data *titles_data;
 
 int find(char *str) //ASCII
 {
@@ -41,18 +54,39 @@ int find(char *str) //ASCII
     return list;
 }
 
-char *titles_names;
-Title_Data *titles_data;
+
 
 int main()
 {
-    start();   
-    multi = (MULTINODE*)Load_on_RAM(string("trie/trie_multi"));
-    basic = (BASICNODE*)Load_on_RAM(string("trie/trie_basic"));
-    lists = (int*)Load_on_RAM(string("trie/lists"));
-    titles_data = (Title_Data*)Load_on_RAM(string("titles/titles_data"));
-    titles_names = (char*)Load_on_RAM(string("titles/titles_names"));
-    printf("Load time: %f seconds\n", stop());
+    int *sizes = (int*)get_shared("albit.sizes", 4*5);
+    if(sizes == nullptr) return -1;
+
+    printf("0\n");
+
+    lists = (int*)get_shared("albit.lists", sizes[0]);
+    if(lists == nullptr) return -1;
+
+    printf("1\n");
+
+    basic = (BASICNODE*)get_shared("albit.trie_basic", sizes[1]);
+    if(basic == nullptr) return -1;
+
+    printf("2\n");
+
+    multi = (MULTINODE*)get_shared("albit.trie_multi", sizes[2]);
+    if(multi == nullptr) return -1;
+
+    printf("3\n");
+
+    titles_data = (Title_Data*)get_shared("albit.titles_data", sizes[3]);
+    if(titles_data == nullptr) return -1;
+
+    printf("4\n");
+
+    titles_names = (char*)get_shared("albit.titles_names", sizes[4]);
+    if(titles_names == nullptr) return -1;
+
+    printf("5\n");
 
     while(1)
     {
