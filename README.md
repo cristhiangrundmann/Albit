@@ -18,6 +18,7 @@ These are the major stages of the engine development
   - [x] Loading the *serialized* data for user searches
   - [x] Word searching
   - [x] Document listings
+  - [ ] Merging results
   - [ ] Document viewer
   
   ## Web application

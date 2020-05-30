@@ -22,8 +22,10 @@
         <div style="margin-left: 130px;">
         <?php
             foreach ($results as $i => $value){
-                echo("<a href='texts/$i.txt'><p class='titulo'>$value</p></a><br>");
+                if(($atual-1)*20<$i && $atual*20>=$i)
+                echo("<a href='texts/$value[0].txt'><p class='titulo'>$value[1]</p></a><br>");
             }
+            
         ?>
     </div>
 
