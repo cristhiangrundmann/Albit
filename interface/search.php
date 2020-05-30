@@ -9,8 +9,10 @@ if(isset($_POST['search_key']) && !empty($_POST['search_key'])){
         $results[$output[$i][0]]=$output[$i][1];
     }
     unset($output);
-    print_r($results);
-    echo($time);
+    $qtd=count($results);
+    //print_r($results);
+    //echo($time);
+    include 'results.html';
 }
 else{
     include 'index.html';

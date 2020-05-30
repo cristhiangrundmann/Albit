@@ -16,18 +16,17 @@
     </div>
     <hr>
     <div align="right">
-        <span>Total de resultados: 2</span>
-        <span>| Tempo de execução: 16ms</span>
+        <span>Total de resultados: <?php echo($qtd); ?></span>
+        <span>| Tempo de execução: <?php echo($time); ?>ms</span>
     </div>
-    <div style="margin-left: 130px;">
-        <a href="../database/texts/1.txt">
-        <p class="titulo">Título do primeiro texto</p></a>
-        <p>Subtítulo do primeiro texto</p>
-        <br>
-        <a href="../database/texts/2.txt">
-        <p class="titulo">Título do segundo texto</p></a>
-        <p>Subtítulo do segundo texto</p>
+        <div style="margin-left: 130px;">
+        <?php
+            foreach ($results as $i => $value){
+                echo("<a href='texts/$i.txt'><p class='titulo'>$value</p></a><br>");
+            }
+        ?>
     </div>
+
 </body>
 </html>
 </doctype>
