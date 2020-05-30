@@ -1,6 +1,7 @@
 #include "albit.h"
 
 #define BUFFERSIZE 0x10000
+#define MAX_RESULTS 1 << 22 //1 << 22 for unlimited; 1 << 10 for extra small file (230 MB)
 
 char line[BUFFERSIZE];
 size_t linelen;
@@ -216,13 +217,14 @@ int main()
     for(int i = 0; i < lists.size(); i++)
     {
         int s = lists[i].size();
+        if(s > MAX_RESULTS) s = MAX_RESULTS;
         fwrite(&s, 4, 1, flist);
         fwrite(&offset, 4, 1, flist);
         offset += s;
     }
 
     for(int i = 0; i < lists.size(); i++)
-    for(int j = 0; j < lists[i].size(); j++)
+    for(int j = 0; j < lists[i].size() && j < MAX_RESULTS; j++)
     {
         fwrite(&(lists[i])[j], 4, 1, flist);
     }
