@@ -20,13 +20,22 @@
         <span>| Tempo de execução: <?php echo($time); ?>ms</span>
     </div>
         <div style="margin-left: 130px;">
+        <p><?php echo($atual) ?></p>
         <?php
             foreach ($results as $i => $value){
-                if(($atual-1)*20<$i && $atual*20>=$i)
+                if(($atual-1)*10<$i && $atual*10>=$i)
                 echo("<a href='texts/$value[0].txt'><p class='titulo'>$value[1]</p></a><br>");
             }
-            
         ?>
+        
+        <form method="POST" action="search.php" align="center">
+            <input type="submit" name="previous" value="Página anterior">
+            <?php echo(str_repeat('&nbsp;', 10)."Página $atual".str_repeat('&nbsp;', 10)); ?>
+            <input type="submit" name="next" value="Próxima página">
+            
+        </form>
+        
+
     </div>
 
 </body>
