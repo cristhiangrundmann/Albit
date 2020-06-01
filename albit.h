@@ -95,7 +95,52 @@ struct BASICNODE
     }
 } PACKED;
 
+struct A_NODE
+{
+    int list;
+    int next[6];
 
+    A_NODE()
+    {
+        list = -1;
+        for(int i = 0; i < 6; i++) next[i] = 0;
+    }
+};
+
+struct B_NODE
+{
+    int next[6];
+
+    B_NODE()
+    {
+        for(int i = 0; i < 6; i++) next[i] = 0;
+    }
+};
+
+void *Load_on_RAM(string filename, int *my_size)
+{
+
+    ifstream file(filename, ios::binary | ios::ate);
+    std::streamsize size = file.tellg();
+    if(my_size) *my_size = size;
+    file.seekg(0, std::ios::beg);
+    
+    if (!file.good())
+        return nullptr;
+    
+    void* data = malloc(size);
+    if (!data)
+        return nullptr;
+
+    if (file.read((char*)data, size)) {   
+        file.close();
+        return data;
+    }
+
+    file.close();
+    free(data);
+    return nullptr;
+}
 
 void* Load_on_RAM(string filename) {
 
