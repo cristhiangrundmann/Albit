@@ -117,7 +117,7 @@ struct B_NODE
     }
 };
 
-void *Load_on_RAM(string filename, int *my_size)
+void *Load_on_RAM(string filename, int *my_size = nullptr)
 {
 
     ifstream file(filename, ios::binary | ios::ate);
@@ -141,30 +141,6 @@ void *Load_on_RAM(string filename, int *my_size)
     free(data);
     return nullptr;
 }
-
-void* Load_on_RAM(string filename) {
-
-    ifstream file(filename, ios::binary | ios::ate);
-    std::streamsize size = file.tellg();
-    file.seekg(0, std::ios::beg);
-    
-    if (!file.good())
-        return nullptr;
-    
-    void* data = malloc(size);
-    if (!data)
-        return nullptr;
-
-    if (file.read((char*)data, size)) {   
-        file.close();
-        return data;
-    }
-
-    file.close();
-    free(data);
-    return nullptr;
-}
-
 
 struct Title_Data {
 
