@@ -13,3 +13,7 @@ a.out
 !database3/.keep
 !titles/.keep
 !trie/.keep
+
+!database3/sha1
+!titles/sha1
+!trie/sha1
