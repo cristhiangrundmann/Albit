@@ -43,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 }
 else{
-    $sugestion = $_GET['sugestion'];
-    pesquisar($sugestion);
+    pesquisar($_GET['sugestion']);
 }
 
 ?>
