@@ -1,7 +1,5 @@
 <?php
 
-global $atual, $qtd, $pgs;
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (isset($_POST['search_key'])) {
@@ -25,11 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         if (isset($_POST['previous'])) {
-            print_r($atual);
+            $atual = max($atual-1,1);
+            include 'results.html';
         }
 
         if (isset($_POST['next'])) {
-            print_r($atual);
+            $atual = max($atual+1,pgs);
+            include 'results.html';
         }
 
 }
