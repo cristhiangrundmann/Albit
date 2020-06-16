@@ -3,7 +3,7 @@
 #include <time.h>
 using namespace std;
 
-int main(int argc, char *argv[]){
+
     string titulos[30];
     int aleatorio;
     srand (time(NULL));
