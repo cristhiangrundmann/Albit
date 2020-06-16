@@ -1,6 +1,6 @@
-database/*
-database2/*
-database3/*
+database_clean/*
+database_raw/*
+database_tag/*
 titles/*
 trie/*
 
@@ -8,12 +8,8 @@ trie/*
 a.out
 ~*
 
-!database/.keep
-!database2/.keep
-!database3/.keep
-!titles/.keep
-!trie/.keep
-
-!database3/sha1
+!database_clean/sha1
+!database_raw/sha1
+!database_tag/sha1
 !titles/sha1
 !trie/sha1
