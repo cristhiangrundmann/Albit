@@ -19,7 +19,7 @@
             <h3> Nenhum Resultado Encontrado. Você quis dizer:</h3>
             <?php
                 foreach ($results as $i => $value){
-                    echo("<h4>$value</h4>");
+                    echo("<h4><a href='./search.php?sugestion=$value'>$value</a></h4>");
                 }
             ?>     
     
