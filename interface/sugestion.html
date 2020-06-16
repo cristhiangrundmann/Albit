@@ -1,0 +1,31 @@
+<doctype html>
+    <html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="shortcut icon" type="image/png" href="favicon.png"/>
+        <meta charset="UTF-8">
+        <title>Albit PSE</title>
+    </head>
+    <body>
+        <div>
+            <form action="search.php" method="POST">
+                <a href="index.html"><img src="Site-Logo.png" height=70 vertical-align="middle"></a>
+                <input type="text" class="searchbox" name="search_key" placeholder="Digite palavra chave para pesquisa"/>
+                <input type="submit" value="Pesquisar" class="buttons"/>
+            </form>
+        </div>
+        <hr>
+        <div style="margin-left: 130px;">
+            <h3> Nenhum Resultado Encontrado. Você quis dizer:</h3>
+            <?php
+                foreach ($results as $i => $value){
+                    echo("<h4>$value</h4>");
+                }
+            ?>     
+    
+        </div>
+    
+    </body>
+    </html>
+    </doctype>
+    

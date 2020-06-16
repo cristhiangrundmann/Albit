@@ -7,13 +7,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exec("./example.out '" . $_POST['search_key'] . "'", $results);
             $time=$results[0];
             unset($results[0]);
-            foreach ($results as $i => $value) {
-                $results[$i]=explode(' => ',$results[$i]);
+            if($time==-1){
+                exec("./sugestion.out '" . $_POST['search_key'] . "'", $results);
+                include 'sugestion.html';
             }
-            $qtd=count($results);
-            $atual=1;
-            $pgs=ceil($qtd/10);
-            include 'results.html';
+            else{
+                foreach ($results as $i => $value) {
+                    $results[$i]=explode(' => ',$results[$i]);
+                }
+                $qtd=count($results);
+                $atual=1;
+                $pgs=ceil($qtd/10);
+                include 'results.html';
+            }
         }
         else{
             include 'index.html';
