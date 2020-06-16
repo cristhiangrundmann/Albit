@@ -179,7 +179,7 @@ int main()
         printf("Processing database 'db%d'... (%ld BASICNODES\t%ld MULTINODES)\n", i, 
         basic.size(), multi.size());
         char filename[24];
-        sprintf(filename, "./database3/db%d", i);
+        sprintf(filename, "./database_clean/db%d", i);
         process_file(filename);
     }
     calc_freq();

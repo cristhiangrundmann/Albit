@@ -6,11 +6,11 @@ int main() {
 
     for (int i = 0; i < 164; i++) {
         
-        string in_name("database2/db");
+        string in_name("database_raw/db");
         in_name += to_string(i);
         cout << in_name << endl;
 
-        string out_name("database3/db");
+        string out_name("database_clean/db");
         out_name += to_string(i);
         
         ifstream db_in(in_name);

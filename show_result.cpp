@@ -33,7 +33,7 @@ static void load_article(int id) {
 
     Title_Data& doc = titles_data[id];
 
-    ifstream file(string("database3/db" + to_string(doc.database)));
+    ifstream file(string("database_clean/db" + to_string(doc.database)));
     file.seekg(doc.database_offset);
 
     bool line_broken = false;

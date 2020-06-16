@@ -33,7 +33,7 @@ int main() {
     // Armazena todos os títulos em um vetor de strings
 	for (int i = 0; i < 164; i++) {
         
-        file_name = "database3/db";
+        file_name = "database_clean/db";
         file_name += to_string(i);
         cout << file_name << endl;
 

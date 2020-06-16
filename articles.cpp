@@ -221,7 +221,7 @@ int main()
     {
         printf("Processing database 'db%d'...\n", i);
         char filename[24];
-        sprintf(filename, "./database/db%d", i);
+        sprintf(filename, "./database_tag/db%d", i);
         process_file(filename);
     }
 

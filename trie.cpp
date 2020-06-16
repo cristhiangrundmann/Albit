@@ -114,7 +114,7 @@ int main() {
 
     Trie trie;
 
-    std::ifstream file("database/db0");
+    std::ifstream file("database_tag/db0");
     std::string line;
     while (std::getline(file, line)) {
         
