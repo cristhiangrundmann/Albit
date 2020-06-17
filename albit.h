@@ -126,42 +126,6 @@ void *Load_on_RAM(string filename, int *my_size = nullptr)
     return nullptr;
 }
 
-static vector<byte> Load_Article(int id, Title_Data* titles_data) {
-
-    vector<byte> article;
-
-    Title_Data& doc = titles_data[id];
-
-    ifstream file(string("database_clean/db" + to_string(doc.database)));
-    file.seekg(doc.database_offset);
-
-    bool line_broken = false;
-
-    string line;
-    while(getline(file, line)) {
-        
-        if (line.size() == 0) {
-            if (!line_broken)
-                article.push_back('\n');
-            line_broken = true;
-            continue;
-        }
-
-        line_broken = false;
-        
-        if(line.compare(0, 4, "#doc") == 0) break;
-
-        line += '\n';
-        article.insert(article.end(), line.begin(), line.end());
-
-    }
-
-    file.close();
-
-    return article;
-
-}
-
 struct timespec t_start, t_end;
 void start()
 {

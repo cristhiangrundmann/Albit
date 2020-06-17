@@ -24,6 +24,7 @@
 
 static Title_Data* titles_data;
 static char* titles_names;
+static vector<byte> article;
 
 static bool Bin_Find(const int* data, int size, int value) {
 
@@ -43,9 +44,43 @@ static bool Bin_Find(const int* data, int size, int value) {
 
 }
 
+static void Load_Article(int id) {
+
+    article.empty();
+
+    Title_Data& doc = titles_data[id];
+
+    ifstream file(string("database_clean/db" + to_string(doc.database)));
+    file.seekg(doc.database_offset);
+
+    bool line_broken = false;
+
+    string line;
+    while(getline(file, line)) {
+        
+        if (line.size() == 0) {
+            if (!line_broken)
+                article.push_back('\n');
+            line_broken = true;
+            continue;
+        }
+
+        line_broken = false;
+        
+        if(line.compare(0, 4, "#doc") == 0) break;
+
+        line += '\n';
+        article.insert(article.end(), line.begin(), line.end());
+
+    }
+
+    file.close();
+
+}
+
 void Show_Article(int id, vector<vector<byte>> target_words) {
 
-    vector<byte> article = Load_Article(id, titles_data);
+    Load_Article(id);
 
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);

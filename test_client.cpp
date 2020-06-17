@@ -20,6 +20,42 @@ BASICNODE *basic;
 char *titles_names;
 Title_Data *titles_data;
 
+static vector<byte> article;
+
+static void Load_Article(int id) {
+
+    article.empty();
+
+    Title_Data& doc = titles_data[id];
+
+    ifstream file(string("../database_clean/db" + to_string(doc.database)));
+    file.seekg(doc.database_offset);
+
+    bool line_broken = false;
+
+    string line;
+    while(getline(file, line)) {
+        
+        if (line.size() == 0) {
+            if (!line_broken)
+                article.push_back('\n');
+            line_broken = true;
+            continue;
+        }
+
+        line_broken = false;
+        
+        if(line.compare(0, 4, "#doc") == 0) break;
+
+        line += '\n';
+        article.insert(article.end(), line.begin(), line.end());
+
+    }
+
+    file.close();
+
+}
+
 int find(char *str) //ASCII
 {
     {
@@ -102,8 +138,8 @@ int main(int argc, char ** argv)
     if (type == 1)
     {
 
-        vector<byte> art = Load_Article(id, titles_data);
-        for(byte b : art)
+        Load_Article(id);
+        for(byte b : article)
             Print_UTF8(b);
     
     } 
@@ -132,5 +168,5 @@ int main(int argc, char ** argv)
     }
 
     return 0;
-    
+
 }
