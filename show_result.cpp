@@ -22,44 +22,8 @@
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 
-static vector<byte> article;
-
 static Title_Data* titles_data;
 static char* titles_names;
-
-static void load_article(int id) {
-
-    article.empty();
-
-    Title_Data& doc = titles_data[id];
-
-    ifstream file(string("database_clean/db" + to_string(doc.database)));
-    file.seekg(doc.database_offset);
-
-    bool line_broken = false;
-
-    string line;
-    while(getline(file, line)) {
-        
-        if (line.size() == 0) {
-            if (!line_broken)
-                article.push_back('\n');
-            line_broken = true;
-            continue;
-        }
-
-        line_broken = false;
-        
-        if(line.compare(0, 4, "#doc") == 0) break;
-
-        line += '\n';
-        article.insert(article.end(), line.begin(), line.end());
-
-    }
-
-    file.close();
-
-}
 
 static bool Bin_Find(const int* data, int size, int value) {
 
@@ -81,7 +45,7 @@ static bool Bin_Find(const int* data, int size, int value) {
 
 void Show_Article(int id, vector<vector<byte>> target_words) {
 
-    load_article(id);
+    vector<byte> article = Load_Article(id, titles_data);
 
     struct winsize w;
     ioctl(0, TIOCGWINSZ, &w);

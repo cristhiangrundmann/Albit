@@ -3,7 +3,7 @@
 
 
 function pesquisar($search_key){
-    exec("./client '" . $search_key . "'", $results, $ret);
+    exec("./client search '" . $search_key . "'", $results, $ret);
     $time=$results[0];
     unset($results[0]);
     if($time==-1){
