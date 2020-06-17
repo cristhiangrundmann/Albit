@@ -8,9 +8,9 @@
 </head>
 <body>
     <div>
-        <form action="search.php" method="POST">
+        <form action="search.php" method="GET">
             <a href="index.html"><img src="Site-Logo.png" height=70 vertical-align="middle"></a>
-            <input type="text" class="searchbox" name="search_key" placeholder="Digite palavra chave para pesquisa"/>
+            <input type="text" class="searchbox" name="word" placeholder="Digite palavra chave para pesquisa"/>
             <input type="submit" value="Pesquisar" class="buttons"/>
         </form>
     </div>
@@ -22,18 +22,9 @@
         <div style="margin-left: 130px;">
         <?php
             foreach ($results as $i => $value){
-                if(($atual-1)*10<$i && $atual*10>=$i)
                 echo("<a href='texts/$value[0].txt'><p class='titulo'>$value[1]</p></a><br>");
             }
-        ?>
-        
-        <form method="POST" action="search.php" align="center">
-            <input type="submit" name="previous" value="Página anterior">
-            <?php echo(str_repeat('&nbsp;', 10)."Página $atual".str_repeat('&nbsp;', 10)); ?>
-            <input type="submit" name="next" value="Próxima página">
-            
-        </form>
-        
+        ?>       
 
     </div>
 
