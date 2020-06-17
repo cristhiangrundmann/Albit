@@ -1,12 +1,13 @@
 #include "albit.h"
 #include <stdio.h>
 #include <sys/mman.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 void *new_shared(const char *name, int size)
 {
-    int fd = shm_open(name, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    int fd = shm_open(name, O_RDWR | O_CREAT, 0666);
     if(fd == -1) return nullptr;
     if(ftruncate(fd, size) == -1) return nullptr;
     void *m = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -39,10 +40,35 @@ BASICNODE *basic;
 char *titles_names;
 Title_Data *titles_data;
 
+int *sizes;
+
+void clean()
+{
+
+    munmap(lists, sizes[0]);
+    munmap(basic, sizes[1]);
+    munmap(multi, sizes[2]);
+    munmap(titles_data, sizes[3]);
+    munmap(titles_names, sizes[4]);
+    shm_unlink("albit.sizes");
+    shm_unlink("albit.lists");
+    shm_unlink("albit.trie_basic");
+    shm_unlink("albit.trie_multi");
+    shm_unlink("albit.titles_data");
+    shm_unlink("albit.titles_names");
+
+}
+
+sig_atomic_t stopFlag = 0;
+
+void handler(int)
+{
+    stopFlag = 1;
+}
 
 int main()
 {
-    int *sizes = (int*)new_shared("albit.sizes", 4*5);
+    sizes = (int*)new_shared("albit.sizes", 4*5);
     if(sizes == nullptr) return -1;
 
     int cur_size;
@@ -66,25 +92,18 @@ int main()
     if(titles_names == nullptr) return -1;
     sizes[4] = cur_size;
 
+    // Impede de dar ^C sem limpar os shm
+    signal(SIGINT, &handler);
+
     printf("Server ready and running...\n");
 
-    while(1)
+    while(stopFlag == 0)
     {
-        char c;
-        scanf("%c", &c);
+        char c = getchar();
         if(c == 'q') break;
     }
 
-    munmap(lists, sizes[0]);
-    munmap(basic, sizes[1]);
-    munmap(multi, sizes[2]);
-    munmap(titles_data, sizes[3]);
-    munmap(titles_names, sizes[4]);
-    shm_unlink("albit.sizes");
-    shm_unlink("albit.lists");
-    shm_unlink("albit.trie_basic");
-    shm_unlink("albit.trie_multi");
-    shm_unlink("albit.titles_data");
-    shm_unlink("albit.titles_names");
+    clean();
+
     return 0;
 }

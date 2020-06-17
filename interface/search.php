@@ -3,7 +3,7 @@
 
 
 function pesquisar($search_key){
-    exec("./example.out '" . $search_key . "'", $results);
+    exec("./client '" . $search_key . "'", $results, $ret);
     $time=$results[0];
     unset($results[0]);
     if($time==-1){
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET'){
     }
     else{
         include 'index.html';
-        echo "<script> confirm('Insira uma pesquisa válida?');</script>";
+        echo "<script> confirm('Insira uma pesquisa válida.');</script>";
     }
 }
 

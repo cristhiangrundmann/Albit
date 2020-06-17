@@ -6,7 +6,7 @@
 
 void *get_shared(const char *name, int size)
 {
-    int fd = shm_open(name, O_RDONLY, S_IRUSR | S_IWUSR);
+    int fd = shm_open(name, O_RDONLY, 0666);
     if(fd == -1) return nullptr;
     void *data =  mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
     if(data == MAP_FAILED) return nullptr;
@@ -59,25 +59,25 @@ int find(char *str) //ASCII
 int main(int argc, char ** argv)
 {
 
-    if(argc != 2) return -1;
+    if(argc != 2) return 1;
     
     int *sizes = (int*)get_shared("albit.sizes", 4*5);
-    if(sizes == nullptr) return -1;
+    if(sizes == nullptr) return 2;
 
     lists = (int*)get_shared("albit.lists", sizes[0]);
-    if(lists == nullptr) return -1;
+    if(lists == nullptr) return 3;
 
     basic = (BASICNODE*)get_shared("albit.trie_basic", sizes[1]);
-    if(basic == nullptr) return -1;
+    if(basic == nullptr) return 4;
 
     multi = (MULTINODE*)get_shared("albit.trie_multi", sizes[2]);
-    if(multi == nullptr) return -1;
+    if(multi == nullptr) return 5;
 
     titles_data = (Title_Data*)get_shared("albit.titles_data", sizes[3]);
-    if(titles_data == nullptr) return -1;
+    if(titles_data == nullptr) return 6;
 
     titles_names = (char*)get_shared("albit.titles_names", sizes[4]);
-    if(titles_names == nullptr) return -1;
+    if(titles_names == nullptr) return 7;
 
     char *word = argv[1];
     start();
