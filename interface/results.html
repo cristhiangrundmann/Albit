@@ -22,9 +22,9 @@
         <div style="margin-left: 130px;">
         <?php
             foreach ($results as $i => $value){
-                echo("<a href='texts/$value[0].txt'><p class='titulo'>$value[1]</p></a><br>");
+                echo("<a href='article.php?id=$value[0]&title=$value[1]'><p class='titulo'>$value[1]</p></a><br>");
             }
-        ?>       
+        ?>
 
     </div>
 

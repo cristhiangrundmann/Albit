@@ -1,6 +1,5 @@
 <?php
 
-
 function show_article($id){
     exec("./client article " . $id, $output, $ret);
     
@@ -21,6 +20,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET'){
         include 'index.html';
     }
 }
-
 
 ?>
