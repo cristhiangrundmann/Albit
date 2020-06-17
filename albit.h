@@ -95,28 +95,6 @@ struct BASICNODE
     }
 } PACKED;
 
-struct A_NODE
-{
-    int list;
-    int next[6];
-
-    A_NODE()
-    {
-        list = -1;
-        for(int i = 0; i < 6; i++) next[i] = 0;
-    }
-};
-
-struct B_NODE
-{
-    int next[6];
-
-    B_NODE()
-    {
-        for(int i = 0; i < 6; i++) next[i] = 0;
-    }
-};
-
 void *Load_on_RAM(string filename, int *my_size = nullptr)
 {
 
