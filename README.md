@@ -26,35 +26,36 @@ These are the major stages of the engine development
     
  ## Preparing the environment for using the search engine
   1. Download or clone this repository
-  2. Download the elaborate database avaliable at: https://shorturl.at/fmCZ5
+  2. Download the elaborate database avaliable [here](https://gvmail-my.sharepoint.com/:u:/g/personal/b39346_fgv_edu_br/Edaj5zg-ywBJkrj6vZu7fb8Bx6L2I4RrPFOq4F2evpu6Xg)
   3. Extract the database inside the repository folder so as to overwrite the database folders
   
  #### For prompt using
   4. Compile and run search.cpp to search
   
-    $g++ -o search search.cpp
+    `g++ -o search search.cpp`
     
   5. Run search and enjoy the engine
   
-    $./search
+    `./search`
 
  #### For web interface using
   4. Compile test_client to /interface/client with argument -lrt (because of the shared memory)
   
-    $g++ -o interface/client test_client.cpp -lrt
+    `g++ -o interface/client test_client.cpp -lrt`
     
   5. Compile test_server.cpp to server with argument -lrt
     
-    $g++ -o server test_server.cpp -lrt
+    `g++ -o server test_server.cpp -lrt`
     
-  6. Install and configure a server emulator. We used Apache on linux, avaliable as:
+  6. Install and configure a server emulator. We used Apache and PHP on Linux, avaliable as:
   
-    $sudo apt install apache2
+    `sudo apt install apache2`
+    `sudo apt install libapache2-mod-php`
     
   7. Configure server emulator's directory to the search engine interface folder. For more information about Apache's direcotory take a look at https://shorturl.at/djAKP
   
   8. Run server
   
-    $./server
+    `./server`
     
-  9. Acess the server adress in your browser and enjoy the search engine
+  9. Access the server adress in your browser and enjoy the search engine
