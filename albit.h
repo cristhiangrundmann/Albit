@@ -30,7 +30,7 @@ enum {
     C_T, C_U, C_V, C_W,
     C_X, C_Y, C_Z,
 
-    NON, SKP, END
+    SKP, NON, END
 };
 
 const byte ISO_8859[256] = {
@@ -54,13 +54,13 @@ const byte ISO_8859[256] = {
 
 #define ALPHSIZE 36
 
-vector<byte> Convert_ISO(const char* word, char end = '\0') {
+vector<byte> Convert_ISO(const char* word, char end = '\0', bool all = false) {
 
     vector<byte> word_converted;
 
     for (const byte* c = (byte*)word; *c != end; c++) {
         byte id = ISO_8859[*c];
-        if (id != NON)
+        if(id != NON || all)
             word_converted.push_back(id);
     }
 
