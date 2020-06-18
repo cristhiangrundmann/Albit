@@ -39,7 +39,7 @@ static bool Bin_Find(const int* data, int size, int value) {
 
 static void Load_Article(int id) {
 
-    article.empty();
+    article.clear();
 
     Title_Data& doc = titles_data[id];
 
@@ -373,12 +373,13 @@ int main()
         {
             SHOW_AGAIN:
             
-            int page = 20;
-
             printf("\033[1;32m");
             int results = lists[list*2];
             int start = lists[list*2+1];
             printf("Found %d results (%f seconds)\n", results, t_search);
+            
+            int page = 20;
+
             for(int i = 0; i < results; i++)
             {
                 
@@ -389,7 +390,7 @@ int main()
                 for(; *t != 0xa; t++) Print_UTF8(*t);
                 printf("\n");
                 page--;
-                if(page == 0)
+                if(page == 0 || i == results - 1)
                 {
                     ASK_AGAIN:
                     printf("\033[0;33m"); 
@@ -397,9 +398,9 @@ int main()
                     string in;
                     std::cin >> in;
                     
-                    int i = ISO_8859[(unsigned char)in[0]];
-                    if(i == C_Y) page = 20;
-                    else if(i == C_N) break;
+                    int cc = ISO_8859[(unsigned char)in[0]];
+                    if(cc == C_Y | cc == C_S) page = 20;
+                    else if(cc == C_N) break;
 
                     else if (is_number(in))
                     {
