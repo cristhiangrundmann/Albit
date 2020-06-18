@@ -56,23 +56,19 @@ static void Load_Article(int id) {
 
 }
 
-int find(char *str) //ASCII
+const byte *find_cur;
+int find() //ASCII
 {
-    {
-        char *t;
-        for(t = str; *t && *t != ' '; t++) *t = ISO_8859[(unsigned char)*t];
-        *t = END;
-    }
-
     int n = 0, list = -1;
-    for(; *str != END; str++)
+    for(; *find_cur != END; find_cur++)
     {
-        if((unsigned char)*str >= ALPHSIZE) continue;
+        if(*find_cur == SKP) continue;
+        if(*find_cur == NON) break;
         if(n >= 0)
         {
-            if(multi[n].next[*str] != 0) 
+            if(multi[n].next[*find_cur] != 0) 
             {
-                n = multi[n].next[*str];
+                n = multi[n].next[*find_cur];
                 if(n >= 0) list = multi[n].list;
                 else list = basic[-n-1].list;
             }
@@ -82,14 +78,85 @@ int find(char *str) //ASCII
         {
             int b = -n-1;
             char c = basic[b].c;
-            if(c != *str) return -1;
+            if(c != *find_cur) return -1;
             n = basic[b].next;
             if(n >= 0) list = multi[n].list;
             else list = basic[-n-1].list;
         }
     }
+
     return list;
 }
+
+bool SIZE_COMPARE(int a, int b)
+{
+    int sa = lists[2*a], sb = lists[2*b];
+    return sa < sb;
+}
+
+vector<int> mresults;
+
+void intersect(int L)
+{
+    int inter_cur = 0;
+    int inter[mresults.size()];
+    int size = lists[2*L];
+    int *big = &lists[lists[2*L+1]];
+
+    for(int i = 0; i < size; i++)
+    {
+        int id = big[i];
+        for(int k : mresults) if(k == id) inter[inter_cur++] = id;
+    }
+
+    mresults.clear();
+    mresults = vector<int>(inter, &inter[inter_cur]);
+}
+
+void find_multi()
+{
+    //GET LIST OF LISTS on mresult
+    mresults.clear();
+    vector<int> stack;
+    while(1)
+    {
+        int r = find();
+
+        if(r < 0)
+        {
+            mresults.clear();
+            return;
+        }
+
+        stack.push_back(r);
+
+        //TRASH
+        if(*find_cur == END) break;
+        for(; *find_cur != END && *find_cur >= ALPHSIZE; find_cur++);
+        if(*find_cur == END) break;
+
+    }
+
+    printf("STACKSIZE: %ld\n", stack.size());
+
+    if(stack.size() == 0) return;
+    sort(stack.begin(), stack.end(), SIZE_COMPARE); // ASCENDING ORDER PLEASE
+    
+    {
+        int size = lists[stack[0]*2];
+        int *first = &lists[lists[stack[0]*2+1]];
+        mresults = vector<int>(first, &first[size]);
+    }
+
+    for(int i = 1; i < stack.size(); i++)
+    {
+        //INTERSECT mresults with bigger list @stack[i]
+        intersect(stack[i]);
+        if(mresults.size() == 0) break;
+    }
+
+}
+
 
 
 int main(int argc, char ** argv)
@@ -148,17 +215,20 @@ int main(int argc, char ** argv)
 
         // TODO - more words
         char *word = argv[2];
+        for(char *c = word; *c; c++) if(*c == '+') *c = ' ';
+        
         start();
-        int list = find(word);
+
+        vector<byte> conv = Convert_ISO(word, '\0', true);
+        find_cur = conv.data();
+        find_multi();
+
         float t_search = stop();
         printf("%f\n", (t_search * 1000));
-
-        int results = lists[list*2];
-        int start = lists[list*2+1];
         
-        for(int i = 0; i < results; i++)
+        for(int i = 0; i < mresults.size(); i++)
         {
-            int __ID__ = lists[start+i];
+            int __ID__ = mresults[i];
             char *t = &titles_names[titles_data[__ID__].offset];
             printf("%d => ", __ID__);
             for(; *t != 0xa; t++) Print_UTF8(*t);
