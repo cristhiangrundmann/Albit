@@ -315,13 +315,13 @@ int find() //ASCII
                 if(n >= 0) list = multi[n].list;
                 else list = basic[-n-1].list;
             }
-            else return -2;
+            else return -1;
         }
         else
         {
             int b = -n-1;
             char c = basic[b].c;
-            if(c != *find_cur) return -3;
+            if(c != *find_cur) return -1;
             n = basic[b].next;
             if(n >= 0) list = multi[n].list;
             else list = basic[-n-1].list;
@@ -339,25 +339,64 @@ bool SIZE_COMPARE(int a, int b)
 
 vector<int> mresults;
 
+void intersect(int L)
+{
+    int inter_cur = 0;
+    int inter[mresults.size()];
+    int size = lists[2*L];
+    int *big = &lists[lists[2*L+1]];
+
+    for(int i = 0; i < size; i++)
+    {
+        int id = big[i];
+        for(int k : mresults) if(k == id) inter[inter_cur++] = id;
+    }
+
+    mresults.clear();
+    mresults = vector<int>(inter, &inter[inter_cur]);
+}
+
 void find_multi()
 {
-    //GET LIST OF LISTS on mresults
+    //GET LIST OF LISTS on mresult
     mresults.clear();
     vector<int> stack;
     while(1)
     {
         int r = find();
-        if(r == -1)
+
+        if(r < 0)
         {
+            mresults.clear();
             return;
         }
-        for(; *find_cur != END, *find_cur >= ALPHSIZE; find_cur++);
-        if(*find_cur == END) break;
+
         stack.push_back(r);
+
+        //TRASH
+        if(*find_cur == END) break;
+        for(; *find_cur != END && *find_cur >= ALPHSIZE; find_cur++);
+        if(*find_cur == END) break;
+
     }
 
-    sort(stack.begin(), stack.end(), SIZE_COMPARE); // ASCENDING ORDER PLEASE
+    printf("STACKSIZE: %ld\n", stack.size());
 
+    if(stack.size() == 0) return;
+    sort(stack.begin(), stack.end(), SIZE_COMPARE); // ASCENDING ORDER PLEASE
+    
+    {
+        int size = lists[stack[0]*2];
+        int *first = &lists[lists[stack[0]*2+1]];
+        mresults = vector<int>(first, &first[size]);
+    }
+
+    for(int i = 1; i < stack.size(); i++)
+    {
+        //INTERSECT mresults with bigger list @stack[i]
+        intersect(stack[i]);
+        if(mresults.size() == 0) break;
+    }
 
 }
 
@@ -379,40 +418,39 @@ int main()
     titles_names = (char*)Load_on_RAM(string("titles/titles_names"));
     printf("Load time: %f seconds\n", stop());
 
-
-
     while(1)
     {
         string word;
         printf("\033[0;34m"); 
         printf("Search >> ");
         printf("\033[1;34m"); 
-        std::cin >> word;
+        cin.sync();
+        getline(std::cin, word);
         start();
 
         int n = 0;
 
-        vector<byte> conv = Convert_ISO(word.c_str());
+        vector<byte> conv = Convert_ISO(word.c_str(), '\0', true);
         find_cur = conv.data();
-        int list = find();
+        find_multi();
         
         float t_search = stop();
+
+        int results = mresults.size();
         
-        if(list >= 0)
+        if(results > 0)
         {
             SHOW_AGAIN:
             
             printf("\033[1;32m");
-            int results = lists[list*2];
-            int start = lists[list*2+1];
+            
             printf("Found %d results (%f seconds)\n", results, t_search);
             
             int page = 20;
 
             for(int i = 0; i < results; i++)
             {
-                
-                int __ID__ = lists[start+i];
+                int __ID__ = mresults[i];
                 printf("\033[0;32m");
                 printf("Result %d: \033[0m", i+1);
                 char *t = &titles_names[titles_data[__ID__].offset];
@@ -441,7 +479,7 @@ int main()
                         vector<vector<byte>> target_words;
                         target_words.push_back(conv);
 
-                        Show_Article(lists[start+result-1], target_words);
+                        Show_Article(mresults[result-1], target_words);
 
                         CLEAN;
                         RESET;
