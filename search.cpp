@@ -299,42 +299,68 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
 
 }
 
-
-
-
-
-
-
-
-int find(const byte *str) //ASCII
+const byte *find_cur;
+int find() //ASCII
 {
-
     int n = 0, list = -1;
-    for(; *str != END; str++)
+    for(; *find_cur != END; find_cur++)
     {
-        if(*str >= ALPHSIZE) continue;
+        if(*find_cur == SKP) continue;
+        if(*find_cur == NON) break;
         if(n >= 0)
         {
-            if(multi[n].next[*str] != 0) 
+            if(multi[n].next[*find_cur] != 0) 
             {
-                n = multi[n].next[*str];
+                n = multi[n].next[*find_cur];
                 if(n >= 0) list = multi[n].list;
                 else list = basic[-n-1].list;
             }
-            else return -1;
+            else return -2;
         }
         else
         {
             int b = -n-1;
             char c = basic[b].c;
-            if(c != *str) return -1;
+            if(c != *find_cur) return -3;
             n = basic[b].next;
             if(n >= 0) list = multi[n].list;
             else list = basic[-n-1].list;
         }
     }
+
     return list;
 }
+
+bool SIZE_COMPARE(int a, int b)
+{
+    int sa = lists[2*a], sb = lists[2*b];
+    return sa < sb;
+}
+
+vector<int> mresults;
+
+void find_multi()
+{
+    //GET LIST OF LISTS on mresults
+    mresults.clear();
+    vector<int> stack;
+    while(1)
+    {
+        int r = find();
+        if(r == -1)
+        {
+            return;
+        }
+        for(; *find_cur != END, *find_cur >= ALPHSIZE; find_cur++);
+        if(*find_cur == END) break;
+        stack.push_back(r);
+    }
+
+    sort(stack.begin(), stack.end(), SIZE_COMPARE); // ASCENDING ORDER PLEASE
+
+
+}
+
 
 bool is_number(const std::string& s)
 {
@@ -353,6 +379,8 @@ int main()
     titles_names = (char*)Load_on_RAM(string("titles/titles_names"));
     printf("Load time: %f seconds\n", stop());
 
+
+
     while(1)
     {
         string word;
@@ -365,7 +393,8 @@ int main()
         int n = 0;
 
         vector<byte> conv = Convert_ISO(word.c_str());
-        int list = find(conv.data());
+        find_cur = conv.data();
+        int list = find();
         
         float t_search = stop();
         
