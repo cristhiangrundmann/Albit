@@ -9,11 +9,11 @@ Search engine project. It searches over the English portion of the Wikicorpus fr
  #### For prompt using
   1. Compile search.cpp
   
-    `g++ -o search search.cpp -O2`
+  `g++ -o search search.cpp -O2`
     
   2. Run search and enjoy the engine
   
-    `./search`
+  `./search`
 
  #### For pre-processing
 
@@ -25,16 +25,19 @@ Search engine project. It searches over the English portion of the Wikicorpus fr
   3. Compile and run clean_raw.cpp to create the clean version of the database
 
   `g++ clean_raw.cpp -o clean_raw -O2`
+
   `./clean_raw`
 
   4. Make the titles data with the file get_titles.cpp (it will create titles/titles_data and titles/titles_names)
 
   `g++ get_titles.cpp -o get_titles -O2`
+
   `./get_titles`
 
   5. Make the trie by running the code on make_trie.cpp (this process takes a while)
 
   `g++ make_trie.cpp -o make_trie.cpp -O2`
+
   `./make_trie`
 
   6. As said before, you can use sha1 to check the generated files.
@@ -43,21 +46,22 @@ Search engine project. It searches over the English portion of the Wikicorpus fr
  #### For web interface using
   1. Compile test_client to /interface/client with argument -lrt (because of the shared memory)
   
-    `g++ -o interface/client test_client.cpp -lrt -O2`
+  `g++ -o interface/client test_client.cpp -lrt -O2`
     
   2. Compile test_server.cpp to server with argument -lrt
     
-    `g++ -o server test_server.cpp -lrt -O2`
+  `g++ -o server test_server.cpp -lrt -O2`
     
   3. Install and configure a server emulator. We used Apache and PHP on Linux, avaliable as:
   
-    `sudo apt install apache2`
-    `sudo apt install libapache2-mod-php`
+  `sudo apt install apache2`
+
+  `sudo apt install libapache2-mod-php`
     
   4. Configure server emulator's directory to the search engine interface folder. For more information about Apache's direcotory take a look at https://shorturl.at/djAKP
   
   5. Keep the server running on background while accessing the page
   
-    `./server`
+  `./server`
     
   6. Access the server adress in your browser and enjoy the search engine
