@@ -21,5 +21,40 @@ These are the major stages of the engine development
   - [ ] Merging results
   - [ ] Document viewer
   
-  ## Web application
+ ## Web application
     - TODO
+    
+ ## Preparing the environment for using the search engine
+  1. Download or clone this repository
+  2. Download the elaborate database avaliable at: https://shorturl.at/fmCZ5
+  3. Extract the database inside the repository folder so as to overwrite the database folders
+  
+ #### For prompt using
+  4. Compile and run search.cpp to search
+  
+    $g++ -o search search.cpp
+    
+  5. Run search and enjoy the engine
+  
+    $./search
+
+ #### For web interface using
+  4. Compile test_client to /interface/client with argument -lrt (because of the shared memory)
+  
+    $g++ -o interface/client test_client.cpp -lrt
+    
+  5. Compile test_server.cpp to server with argument -lrt
+    
+    $g++ -o server test_server.cpp -lrt
+    
+  6. Install and configure a server emulator. We used Apache on linux, avaliable as:
+  
+    $sudo apt install apache2
+    
+  7. Configure server emulator's directory to the search engine interface folder. For more information about Apache's direcotory take a look at https://shorturl.at/djAKP
+  
+  8. Run server
+  
+    $./server
+    
+  9. Acess the server adress in your browser and enjoy the search engine
