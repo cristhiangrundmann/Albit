@@ -1,5 +1,6 @@
 # Albit
 Search engine project. It searches over the English portion of the Wikicorpus from [https://www.cs.upc.edu/~nlp/wikicorpus/].
+The project report is in this repository as report.pdf and the video presentation is avaliable [here](https://youtu.be/azfLyqZMez0).
 
  ## Preparing the environment for using the search engine
   1. Download or clone this repository
@@ -58,7 +59,7 @@ Search engine project. It searches over the English portion of the Wikicorpus fr
 
   `sudo apt install libapache2-mod-php`
     
-  4. Configure server emulator's directory to the search engine interface folder. For more information about Apache's direcotory take a look at https://shorturl.at/djAKP
+  4. Configure server emulator's directory to the search engine interface folder. For more information about Apache's direcotory take a look [here](https://askubuntu.com/questions/337874/change-apache-document-root-folder-to-secondary-hard-drive)
   
   5. Keep the server running on background while accessing the page
   
