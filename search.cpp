@@ -300,6 +300,8 @@ void Show_Article(int id, vector<vector<byte>> target_words) {
 }
 
 const byte *find_cur;
+vector<vector<byte>> words_cur;
+
 int find() //ASCII
 {
     int n = 0, list = -1;
@@ -361,8 +363,18 @@ void find_multi()
     //GET LIST OF LISTS on mresult
     mresults.clear();
     vector<int> stack;
+
+    words_cur.clear();
+
     while(1)
     {
+        const byte* word_end = find_cur;
+        for(;*word_end < SKP; word_end++);
+        vector<byte> word(find_cur, word_end);
+        word.push_back(END);
+
+        words_cur.push_back(word);
+
         int r = find();
 
         if(r < 0)
@@ -476,10 +488,7 @@ int main()
                         if (result - 1 >= results)
                             goto ASK_AGAIN;
 
-                        vector<vector<byte>> target_words;
-                        target_words.push_back(conv);
-
-                        Show_Article(mresults[result-1], target_words);
+                        Show_Article(mresults[result-1], words_cur);
 
                         CLEAN;
                         RESET;
