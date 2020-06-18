@@ -10,7 +10,7 @@
     <div>
         <form action="search.php" method="GET">
             <a href="index.html"><img src="Site-Logo.png" height=70 vertical-align="middle"></a>
-            <input type="text" class="searchbox" name="word" placeholder="Digite palavra chave para pesquisa"/>
+            <input type="text" class="searchbox" name="word" value=<?php echo($search_key); ?> />
             <input type="submit" value="Pesquisar" class="buttons"/>
         </form>
     </div>
