@@ -338,7 +338,7 @@ bool SIZE_COMPARE(int a, int b)
     int sa = lists[2*a], sb = lists[2*b];
     return sa < sb;
 }
-#define MAX_RESULTS 1000000
+#define MAX_RESULTS 1300000
 int b0[MAX_RESULTS], b1[MAX_RESULTS];
 int *mresults = b0, *mtemp = b1;
 int mresults_size = 0;
