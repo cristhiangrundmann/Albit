@@ -338,30 +338,33 @@ bool SIZE_COMPARE(int a, int b)
     int sa = lists[2*a], sb = lists[2*b];
     return sa < sb;
 }
-
-vector<int> mresults;
+#define MAX_RESULTS 1000000
+int b0[MAX_RESULTS], b1[MAX_RESULTS];
+int *mresults = b0, *mtemp = b1;
+int mresults_size = 0;
 
 void intersect(int L)
 {
     int inter_cur = 0;
-    int inter[mresults.size()];
     int size = lists[2*L];
     int *big = &lists[lists[2*L+1]];
 
     for(int i = 0; i < size; i++)
     {
         int id = big[i];
-        for(int k : mresults) if(k == id) inter[inter_cur++] = id;
+        for(int j = 0; j < mresults_size; j++) if(mresults[j] == id) mtemp[inter_cur++] = id;
     }
 
-    mresults.clear();
-    mresults = vector<int>(inter, &inter[inter_cur]);
+    int *t = mtemp;
+    mtemp = mresults;
+    mresults = t;
+    mresults_size = inter_cur;
 }
 
 void find_multi()
 {
     //GET LIST OF LISTS on mresult
-    mresults.clear();
+    mresults_size = 0;
     vector<int> stack;
 
     words_cur.clear();
@@ -379,7 +382,7 @@ void find_multi()
 
         if(r < 0)
         {
-            mresults.clear();
+            mresults_size = 0;
             return;
         }
 
@@ -392,22 +395,22 @@ void find_multi()
 
     }
 
-    printf("STACKSIZE: %ld\n", stack.size());
-
     if(stack.size() == 0) return;
     sort(stack.begin(), stack.end(), SIZE_COMPARE); // ASCENDING ORDER PLEASE
     
     {
         int size = lists[stack[0]*2];
         int *first = &lists[lists[stack[0]*2+1]];
-        mresults = vector<int>(first, &first[size]);
+        //mresults = vector<int>(first, &first[size]);
+        mresults_size = size;
+        for(int i = 0; i < size; i++) mresults[i] = first[i];
     }
 
     for(int i = 1; i < stack.size(); i++)
     {
         //INTERSECT mresults with bigger list @stack[i]
         intersect(stack[i]);
-        if(mresults.size() == 0) break;
+        if(mresults_size == 0) break;
     }
 
 }
@@ -448,7 +451,7 @@ int main()
         
         float t_search = stop();
 
-        int results = mresults.size();
+        int results = mresults_size;
         
         if(results > 0)
         {
